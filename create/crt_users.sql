@@ -5,13 +5,15 @@ create table USERS (
   username varchar2(50) not null,
   email varchar2(255) not null,
   password_hash varchar2(255) not null,
+  coins number default 0 not null,
   bio varchar2(500),
   profile_pic varchar2(500),
   created_at timestamp default current_timestamp not null,
   last_login timestamp,
   constraint pk_users primary key (user_id),
   constraint uq_users_username unique (username),
-  constraint uq_users_email unique (email)
+  constraint uq_users_email unique (email),
+  constraint ck_users_coins check (coins >= 0)
 );
 
 exit;

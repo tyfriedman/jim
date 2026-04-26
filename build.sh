@@ -25,6 +25,8 @@ sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_exercise.sql
 sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_workout_log.sql
 sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_workout_entry.sql
 sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_goal.sql
+sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_feed_comment.sql
+sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_feed_hype.sql
 sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_avatar.sql
 sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_avatar_item.sql
 sqlplus "${ORACLE_CONNECTION_STRING}" @create/crt_avatar_inventory.sql

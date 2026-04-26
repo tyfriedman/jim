@@ -7,10 +7,13 @@ create table GOAL (
   title varchar2(200) not null,
   target_value number not null,
   deadline date,
+  is_completed number(1) default 0 not null,
+  completed_at timestamp,
   created_at timestamp default current_timestamp not null,
   constraint pk_goal primary key (goal_id),
   constraint fk_goal_user foreign key (user_id) references USERS(user_id),
-  constraint fk_goal_exercise foreign key (exercise_id) references EXERCISE(exercise_id)
+  constraint fk_goal_exercise foreign key (exercise_id) references EXERCISE(exercise_id),
+  constraint ck_goal_is_completed check (is_completed in (0, 1))
 );
 
 exit;
