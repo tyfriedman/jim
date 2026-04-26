@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const { initPool, closePool } = require("./db/connection");
 
 const authRoutes = require("./routes/auth");
@@ -13,6 +14,21 @@ const challengeRoutes = require("./routes/challenges");
 const avatarRoutes = require("./routes/avatar");
 
 const app = express();
+
+const clientOrigin = process.env.CLIENT_ORIGIN;
+if (clientOrigin) {
+  const origins = clientOrigin
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  app.use(
+    cors({
+      origin: origins.length === 1 ? origins[0] : origins,
+      credentials: true
+    })
+  );
+}
+
 app.use(express.json());
 
 app.get("/health", async (_req, res) => {
