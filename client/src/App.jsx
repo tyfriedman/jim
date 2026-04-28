@@ -67,7 +67,7 @@ export default function App() {
         path="/shop"
         element={
           <PrivateRoute>
-            <SectionPage title="Shop" />
+            <SectionPage title="Challenges" />
           </PrivateRoute>
         }
       />
@@ -83,7 +83,7 @@ export default function App() {
         path="/profile"
         element={
           <PrivateRoute>
-            <SectionPage title="Profile" />
+            <SectionPage title="Shop" />
           </PrivateRoute>
         }
       />

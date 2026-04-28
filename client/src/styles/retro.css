@@ -420,9 +420,63 @@ body {
 
 .retro-home-field {
   min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
   border: 0;
   box-shadow: none;
   background: transparent;
+}
+
+.retro-home-avatar-wrap {
+  width: 128px;
+  height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  will-change: transform;
+}
+
+.retro-home-avatar {
+  image-rendering: pixelated;
+  transform: scale(1.5);
+  transform-origin: center;
+}
+
+.retro-home-avatar-wrap:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 6px;
+}
+
+.retro-home-avatar--idle {
+  animation: retroAvatarBob 880ms ease-in-out infinite;
+}
+
+.retro-home-avatar--introRun,
+.retro-home-avatar--introSkid,
+.retro-home-avatar--jumpStart,
+.retro-home-avatar--jumpAir,
+.retro-home-avatar--jumpLand {
+  animation: none;
+}
+
+.retro-home-avatar-wrap--jumpAir {
+  pointer-events: none;
+}
+
+.retro-home-avatar-wrap--introRun,
+.retro-home-avatar-wrap--introSkid,
+.retro-home-avatar-wrap--jumpStart,
+.retro-home-avatar-wrap--jumpAir,
+.retro-home-avatar-wrap--jumpLand {
+  cursor: default;
 }
 
 .retro-section-empty {
@@ -887,6 +941,18 @@ body {
   }
 }
 
+@keyframes retroAvatarBob {
+  0% {
+    transform: translateY(0) scale(1.5);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.5);
+  }
+  100% {
+    transform: translateY(0) scale(1.5);
+  }
+}
+
 .retro-stats {
   margin: 20px 0;
   display: grid;
@@ -988,11 +1054,31 @@ body {
     min-height: 260px;
   }
 
+  .retro-home-avatar {
+    transform: scale(1.25);
+  }
+
+  .retro-home-avatar--idle {
+    animation: retroAvatarBobMobile 880ms ease-in-out infinite;
+  }
+
   .retro-nav-block {
     min-height: 70px;
   }
 
   .retro-friends-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes retroAvatarBobMobile {
+  0% {
+    transform: translateY(0) scale(1.25);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.25);
+  }
+  100% {
+    transform: translateY(0) scale(1.25);
   }
 }
