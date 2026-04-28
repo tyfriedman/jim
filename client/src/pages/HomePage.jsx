@@ -36,14 +36,15 @@ export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const swipeDirection = location.state?.swipeDirection;
+  const introDirection = swipeDirection === "left" ? -1 : 1;
   const [avatarPhase, setAvatarPhase] = useState(AVATAR_PHASES.INTRO_RUN);
-  const [avatarOffsetX, setAvatarOffsetX] = useState(INTRO_START_OFFSET_X);
+  const [avatarOffsetX, setAvatarOffsetX] = useState(() => INTRO_START_OFFSET_X * introDirection);
   const [avatarOffsetY, setAvatarOffsetY] = useState(0);
   const [motionDurationMs, setMotionDurationMs] = useState(0);
   const [motionEasing, setMotionEasing] = useState("linear");
   const timeoutRefs = useRef([]);
 
-  const swipeDirection = location.state?.swipeDirection;
   const avatarAnimation = AVATAR_PHASE_ANIMATION[avatarPhase] ?? AVATAR_PHASE_ANIMATION.idle;
   const avatarFrameCount =
     HOME_AVATAR_FRAME_COUNTS[avatarAnimation.row] ?? HOME_AVATAR_FRAME_COUNTS[0];
@@ -63,11 +64,16 @@ export default function HomePage() {
 
   useEffect(() => {
     clearQueuedTimeouts();
+    setAvatarOffsetX(INTRO_START_OFFSET_X * introDirection);
+    setAvatarOffsetY(0);
+    setAvatarPhase(AVATAR_PHASES.INTRO_RUN);
+    setMotionDurationMs(0);
+    setMotionEasing("linear");
 
     queueTimeout(() => {
       setMotionDurationMs(INTRO_RUN_DURATION_MS);
       setMotionEasing("linear");
-      setAvatarOffsetX(INTRO_SKID_OFFSET_X);
+      setAvatarOffsetX(INTRO_SKID_OFFSET_X * introDirection);
     }, 0);
 
     queueTimeout(() => {
@@ -88,7 +94,7 @@ export default function HomePage() {
     return () => {
       clearQueuedTimeouts();
     };
-  }, []);
+  }, [introDirection]);
 
   const handleAvatarPress = () => {
     if (avatarPhase !== AVATAR_PHASES.IDLE) {
@@ -128,8 +134,14 @@ export default function HomePage() {
     [avatarPhase],
   );
   const avatarClassName = useMemo(
-    () => `retro-home-avatar retro-home-avatar--${avatarPhase}`,
-    [avatarPhase],
+    () =>
+      `retro-home-avatar retro-home-avatar--${avatarPhase} ${
+        introDirection === -1 &&
+        (avatarPhase === AVATAR_PHASES.INTRO_RUN || avatarPhase === AVATAR_PHASES.INTRO_SKID)
+          ? "retro-home-avatar--mirrored"
+          : ""
+      }`,
+    [avatarPhase, introDirection],
   );
   const avatarWrapStyle = useMemo(
     () => ({

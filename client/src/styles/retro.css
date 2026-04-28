@@ -445,9 +445,16 @@ body {
 }
 
 .retro-home-avatar {
+  --avatar-scale-x: 1;
   image-rendering: pixelated;
-  transform: scale(1.5);
+  transform: scaleX(var(--avatar-scale-x)) scale(1.5);
   transform-origin: center;
+  backface-visibility: hidden;
+  will-change: transform, background-position;
+}
+
+.retro-home-avatar--mirrored {
+  --avatar-scale-x: -1;
 }
 
 .retro-home-avatar-wrap:focus-visible {
@@ -943,13 +950,13 @@ body {
 
 @keyframes retroAvatarBob {
   0% {
-    transform: translateY(0) scale(1.5);
+    transform: translateY(0) scaleX(var(--avatar-scale-x)) scale(1.5);
   }
   50% {
-    transform: translateY(-6px) scale(1.5);
+    transform: translateY(-6px) scaleX(var(--avatar-scale-x)) scale(1.5);
   }
   100% {
-    transform: translateY(0) scale(1.5);
+    transform: translateY(0) scaleX(var(--avatar-scale-x)) scale(1.5);
   }
 }
 
@@ -1055,7 +1062,7 @@ body {
   }
 
   .retro-home-avatar {
-    transform: scale(1.25);
+    transform: scaleX(var(--avatar-scale-x)) scale(1.25);
   }
 
   .retro-home-avatar--idle {
@@ -1073,12 +1080,12 @@ body {
 
 @keyframes retroAvatarBobMobile {
   0% {
-    transform: translateY(0) scale(1.25);
+    transform: translateY(0) scaleX(var(--avatar-scale-x)) scale(1.25);
   }
   50% {
-    transform: translateY(-5px) scale(1.25);
+    transform: translateY(-5px) scaleX(var(--avatar-scale-x)) scale(1.25);
   }
   100% {
-    transform: translateY(0) scale(1.25);
+    transform: translateY(0) scaleX(var(--avatar-scale-x)) scale(1.25);
   }
 }

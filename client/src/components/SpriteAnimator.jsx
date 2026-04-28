@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function SpriteAnimator({
   src,
@@ -13,9 +13,9 @@ export default function SpriteAnimator({
   className = "",
 }) {
   const [computedFrameCount, setComputedFrameCount] = useState(1);
-  const [frameIndex, setFrameIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const spriteRef = useRef(null);
 
   const totalFrames = Math.max(1, frameCountOverride ?? computedFrameCount);
   const minFrame = Math.max(0, Math.min(startFrame, totalFrames - 1));
@@ -32,7 +32,6 @@ export default function SpriteAnimator({
     setIsLoaded(false);
     setHasError(false);
     setComputedFrameCount(1);
-    setFrameIndex(0);
 
     image.onload = () => {
       if (!isMounted) {
@@ -60,13 +59,23 @@ export default function SpriteAnimator({
     };
   }, [frameWidth, src]);
 
+  const setSpriteFrame = (targetFrame) => {
+    if (!spriteRef.current) {
+      return;
+    }
+
+    spriteRef.current.style.backgroundPosition = `-${targetFrame * frameWidth}px -${
+      row * frameHeight
+    }px`;
+  };
+
   useEffect(() => {
     if (!isLoaded || hasError) {
       return;
     }
 
-    setFrameIndex(minFrame);
-  }, [hasError, isLoaded, minFrame, totalFrames]);
+    setSpriteFrame(clampedFixedFrame == null ? minFrame : clampedFixedFrame);
+  }, [clampedFixedFrame, frameHeight, frameWidth, hasError, isLoaded, minFrame, row]);
 
   useEffect(() => {
     if (!isLoaded || hasError || clampedFixedFrame != null || minFrame === maxFrame) {
@@ -74,12 +83,24 @@ export default function SpriteAnimator({
     }
 
     const frameDurationMs = Math.max(40, Math.round(1000 / fps));
-    const intervalId = window.setInterval(() => {
-      setFrameIndex((prev) => (prev >= maxFrame ? minFrame : prev + 1));
-    }, frameDurationMs);
+    let frameCursor = minFrame;
+    let previousTickMs = performance.now();
+    let animationFrameId = 0;
+
+    const tick = (currentTickMs) => {
+      if (currentTickMs - previousTickMs >= frameDurationMs) {
+        frameCursor = frameCursor >= maxFrame ? minFrame : frameCursor + 1;
+        setSpriteFrame(frameCursor);
+        previousTickMs = currentTickMs;
+      }
+
+      animationFrameId = window.requestAnimationFrame(tick);
+    };
+
+    animationFrameId = window.requestAnimationFrame(tick);
 
     return () => {
-      window.clearInterval(intervalId);
+      window.cancelAnimationFrame(animationFrameId);
     };
   }, [clampedFixedFrame, fps, hasError, isLoaded, maxFrame, minFrame]);
 
@@ -89,11 +110,9 @@ export default function SpriteAnimator({
       height: `${frameHeight}px`,
       backgroundImage: `url(${src})`,
       backgroundRepeat: "no-repeat",
-      backgroundPosition: `-${
-        (clampedFixedFrame == null ? frameIndex : clampedFixedFrame) * frameWidth
-      }px -${row * frameHeight}px`,
+      backgroundPosition: `-${minFrame * frameWidth}px -${row * frameHeight}px`,
     }),
-    [clampedFixedFrame, frameHeight, frameIndex, frameWidth, row, src],
+    [frameHeight, frameWidth, minFrame, row, src],
   );
 
   if (hasError) {
@@ -101,6 +120,6 @@ export default function SpriteAnimator({
   }
 
   return (
-    <div className={className} aria-hidden={!isLoaded} role="img" style={spriteStyle} />
+    <div ref={spriteRef} className={className} aria-hidden={!isLoaded} role="img" style={spriteStyle} />
   );
 }
