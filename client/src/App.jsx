@@ -2,6 +2,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./context/AuthContext.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import SectionPage from "./pages/SectionPage.jsx";
+import WorkoutsPage from "./pages/WorkoutsPage.jsx";
+import FriendsPage from "./pages/FriendsPage.jsx";
 
 function PrivateRoute({ children }) {
   const { token, authReady } = useAuth();
@@ -49,6 +52,38 @@ export default function App() {
         element={
           <PrivateRoute>
             <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/workouts"
+        element={
+          <PrivateRoute>
+            <WorkoutsPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/shop"
+        element={
+          <PrivateRoute>
+            <SectionPage title="Shop" />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/friends"
+        element={
+          <PrivateRoute>
+            <FriendsPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <SectionPage title="Profile" />
           </PrivateRoute>
         }
       />

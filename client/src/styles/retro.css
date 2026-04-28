@@ -84,6 +84,49 @@ body {
   border-radius: 4px;
 }
 
+.retro-cloud--2::before,
+.retro-cloud--2::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+  border: 4px solid #1a1a2e;
+}
+
+.retro-cloud--2::before {
+  width: 44px;
+  height: 44px;
+  top: -22px;
+  left: 12px;
+  border-radius: 4px;
+}
+
+.retro-cloud--2::after {
+  width: 34px;
+  height: 34px;
+  top: -14px;
+  right: 10px;
+  border-radius: 4px;
+}
+
+.retro-cloud--3 {
+  width: 88px;
+  height: 36px;
+  top: 31%;
+  left: 14%;
+  border-radius: 4px;
+  animation: retroCloudFloat 4.8s ease-in-out infinite;
+}
+
+.retro-cloud--4 {
+  width: 104px;
+  height: 42px;
+  top: 8%;
+  left: 80%;
+  border-radius: 4px;
+}
+
+
+
 .retro-hill {
   position: absolute;
   bottom: 0;
@@ -275,6 +318,575 @@ body {
   font-size: 16px;
 }
 
+.retro-home,
+.retro-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 18px 12px 92px;
+}
+
+.retro-home-hud {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 100%);
+  margin: 0 auto 14px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e52521;
+  border: 4px solid #1a1a2e;
+  box-shadow: 6px 6px 0 #1a1a2e;
+}
+
+.retro-brand--home {
+  margin: 0;
+  text-align: left;
+  font-size: 11px;
+}
+
+.retro-home-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.retro-home-username {
+  margin: 0;
+  font-size: 8px;
+  color: #fef9e7;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.retro-btn--small {
+  padding: 10px 12px;
+  font-size: 8px;
+}
+
+.retro-home-layout {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 100%);
+  margin: 0 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(96px, 180px) 1fr minmax(96px, 180px);
+  gap: 12px;
+  align-items: stretch;
+  flex: 1;
+}
+
+.retro-nav-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.retro-nav-column--left {
+  align-items: flex-start;
+}
+
+.retro-nav-column--right {
+  align-items: flex-end;
+}
+
+.retro-nav-block {
+  width: 100%;
+  min-height: 84px;
+  font-family: inherit;
+  font-size: 8px;
+  color: #1a1a2e;
+  background: #fce300;
+  border: 4px solid #1a1a2e;
+  box-shadow: 6px 6px 0 #1a1a2e;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.retro-nav-block:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 #1a1a2e;
+}
+
+.retro-nav-block:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.retro-home-field {
+  min-height: 340px;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.retro-section-empty {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 100%);
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.retro-empty-field {
+  width: min(620px, 100%);
+  min-height: 300px;
+  border: 4px solid #1a1a2e;
+  box-shadow: 8px 8px 0 #1a1a2e;
+  background: rgba(92, 148, 252, 0.32);
+}
+
+.retro-workouts-shell {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.retro-workouts-header {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.retro-workouts-header .retro-title {
+  margin: 0;
+}
+
+.retro-workouts-banner {
+  margin-bottom: 0;
+  background: #1a1a2e;
+  color: #fce300;
+  text-shadow: none;
+}
+
+.retro-workout-form-panel {
+  width: 100%;
+  max-width: none;
+}
+
+.retro-workout-subtitle {
+  margin-bottom: 16px;
+}
+
+.retro-workout-textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.retro-workout-entry-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-workout-entry-title {
+  margin: 0;
+}
+
+.retro-workout-entry-row {
+  border: 4px solid #1a1a2e;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px;
+}
+
+.retro-cardio-hint {
+  margin: 8px 0 0;
+}
+
+.retro-workout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.retro-workout-card {
+  border: 4px solid #1a1a2e;
+  box-shadow: 6px 6px 0 #1a1a2e;
+  background: #1f3b73;
+  color: #ffffff;
+}
+
+.retro-workout-toggle {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 14px;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.retro-workout-toggle:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+}
+
+.retro-workout-card-title {
+  font-size: 10px;
+  color: #fce300;
+  text-shadow: 2px 2px 0 #8b4513;
+}
+
+.retro-workout-date,
+.retro-workout-summary,
+.retro-workout-engagement {
+  color: #fff;
+}
+
+.retro-workout-detail {
+  border-top: 4px solid #1a1a2e;
+  padding: 12px 14px 14px;
+  display: grid;
+  gap: 10px;
+  background: #1a3161;
+  color: #ffffff;
+}
+
+.retro-workout-copy {
+  margin: 0;
+  font-size: 8px;
+}
+
+.retro-workout-entry-list {
+  display: grid;
+  gap: 8px;
+}
+
+.retro-workout-entry-item {
+  border: 4px solid #1a1a2e;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  padding: 8px 10px;
+  background: #27467f;
+  color: #ffffff;
+}
+
+.retro-workout-entry-name {
+  margin: 0 0 4px;
+  font-size: 8px;
+  color: #fce300;
+}
+
+.retro-workout-entry-meta,
+.retro-workout-entry-notes {
+  margin: 0;
+  font-size: 8px;
+}
+
+.retro-workout-comments {
+  display: grid;
+  gap: 8px;
+}
+
+.retro-workout-comments .retro-label {
+  margin: 0;
+}
+
+.retro-workout-comment-item {
+  border: 4px solid #1a1a2e;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  background: #27467f;
+  padding: 8px 10px;
+  color: #ffffff;
+}
+
+.retro-workout-edit-panel {
+  width: 100%;
+  max-width: none;
+}
+
+.retro-select {
+  position: relative;
+}
+
+.retro-select-trigger {
+  width: 100%;
+  font-family: inherit;
+  font-size: 10px;
+  padding: 12px 10px;
+  color: #1a1a2e;
+  background: #fff;
+  border: 4px solid #1a1a2e;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.retro-select-trigger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.retro-select-trigger:focus-visible {
+  outline: 3px solid #fce300;
+  outline-offset: 2px;
+}
+
+.retro-select-caret {
+  font-size: 8px;
+}
+
+.retro-select-menu {
+  position: absolute;
+  z-index: 15;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  border: 4px solid #1a1a2e;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  background: #fff;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.retro-select-option {
+  width: 100%;
+  font-family: inherit;
+  font-size: 9px;
+  text-align: left;
+  color: #1a1a2e;
+  border: 0;
+  border-bottom: 2px solid #1a1a2e;
+  background: #fff;
+  padding: 10px 8px;
+  cursor: pointer;
+}
+
+.retro-select-option:last-child {
+  border-bottom: 0;
+}
+
+.retro-select-option:hover:not(:disabled) {
+  background: #fce300;
+}
+
+.retro-select-option--active {
+  background: #6abf47;
+}
+
+.retro-workout-comment-user,
+.retro-workout-comment-text {
+  margin: 0;
+  font-size: 8px;
+}
+
+.retro-workout-comment-user {
+  color: #fce300;
+  margin-bottom: 4px;
+}
+
+.retro-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(10, 16, 32, 0.74);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.retro-modal-panel {
+  width: min(520px, 100%);
+  max-width: 520px;
+  z-index: 31;
+}
+
+.retro-modal-copy {
+  margin: 0 0 8px;
+}
+
+.retro-workout-empty {
+  align-self: center;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  background: #1f3b73;
+  color: #ffffff;
+}
+
+.retro-friends-shell {
+  width: min(960px, 100%);
+}
+
+.retro-friends-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.retro-friends-feed {
+  min-width: 0;
+}
+
+.retro-friends-feed .retro-empty-field {
+  width: 100%;
+}
+
+.retro-friends-hub {
+  width: 100%;
+  max-width: none;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.retro-friends-tab-toggle {
+  margin-bottom: 0;
+}
+
+.retro-friends-add-tab-action {
+  margin-top: -4px;
+}
+
+.retro-friends-add-tab-btn {
+  font-size: 8px;
+}
+
+.retro-friends-hub-list {
+  display: grid;
+  gap: 8px;
+}
+
+.retro-friends-hub-item {
+  border: 4px solid #1a1a2e;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  padding: 8px 10px;
+  background: #27467f;
+  color: #ffffff;
+}
+
+.retro-friends-hub-name {
+  margin: 0 0 6px;
+  color: #fce300;
+  font-size: 8px;
+}
+
+.retro-friends-hub-item .retro-hint {
+  margin-bottom: 0;
+}
+
+.retro-friends-requests-wrap,
+.retro-friends-add-wrap {
+  display: grid;
+  gap: 12px;
+}
+
+.retro-friends-manage-wrap {
+  display: grid;
+  gap: 14px;
+}
+
+.retro-friends-comment-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.retro-friends-empty {
+  min-height: 90px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  background: #1f3b73;
+}
+
+.retro-friends-feed-empty {
+  background: #1f3b73;
+}
+
+.retro-scene {
+  isolation: isolate;
+}
+
+.retro-scene--swipe-left {
+  animation: retroSwipeLeft 440ms steps(8, end);
+}
+
+.retro-scene--swipe-right {
+  animation: retroSwipeRight 440ms steps(8, end);
+}
+
+.retro-scene--swipe-left .retro-cloud,
+.retro-scene--swipe-right .retro-cloud {
+  animation: retroCloudShift 440ms linear;
+}
+
+@keyframes retroSwipeLeft {
+  0% {
+    transform: translateX(20%);
+    opacity: 0.86;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes retroSwipeRight {
+  0% {
+    transform: translateX(-20%);
+    opacity: 0.86;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes retroCloudShift {
+  0% {
+    transform: translateX(24px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes retroCloudFloat {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(18px, -4px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
 .retro-stats {
   margin: 20px 0;
   display: grid;
@@ -345,5 +957,42 @@ body {
 
   .retro-btn {
     font-size: 10px;
+  }
+
+  .retro-nav-block {
+    font-size: 9px;
+  }
+
+  .retro-friends-add-tab-btn {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 780px) {
+  .retro-home-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .retro-nav-column {
+    flex-direction: row;
+  }
+
+  .retro-nav-column--left,
+  .retro-nav-column--right {
+    align-items: stretch;
+  }
+
+  .retro-home-field {
+    order: -1;
+    min-height: 260px;
+  }
+
+  .retro-nav-block {
+    min-height: 70px;
+  }
+
+  .retro-friends-layout {
+    grid-template-columns: 1fr;
   }
 }

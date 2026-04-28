@@ -7,6 +7,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
+  const [loginUsername, setLoginUsername] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       if (mode === "login") {
-        await login(email.trim(), password);
+        await login(loginUsername.trim(), password);
       } else {
         await register(username.trim(), email.trim(), password);
       }
@@ -91,18 +92,34 @@ export default function LoginPage() {
             </label>
           ) : null}
 
-          <label className="retro-field">
-            <span className="retro-label">Email</span>
-            <input
-              className="retro-input"
-              type="email"
-              name="email"
-              autoComplete="email"
-              value={email}
-              onChange={(ev) => setEmail(ev.target.value)}
-              required
-            />
-          </label>
+          {mode === "login" ? (
+            <label className="retro-field">
+              <span className="retro-label">Username</span>
+              <input
+                className="retro-input"
+                name="username"
+                autoComplete="username"
+                value={loginUsername}
+                onChange={(ev) => setLoginUsername(ev.target.value)}
+                required
+                minLength={1}
+                maxLength={50}
+              />
+            </label>
+          ) : (
+            <label className="retro-field">
+              <span className="retro-label">Email</span>
+              <input
+                className="retro-input"
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={email}
+                onChange={(ev) => setEmail(ev.target.value)}
+                required
+              />
+            </label>
+          )}
 
           <label className="retro-field">
             <span className="retro-label">Password</span>

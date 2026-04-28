@@ -54,9 +54,9 @@ router.post("/register", async (req, res, next) => {
 });
 
 router.post("/login", async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: "email and password are required." });
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: "username and password are required." });
   }
 
   try {
@@ -64,8 +64,8 @@ router.post("/login", async (req, res, next) => {
       connection.execute(
         `SELECT user_id, password_hash, coins
          FROM USERS
-         WHERE email = :email`,
-        { email },
+         WHERE username = :username`,
+        { username },
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       )
     );

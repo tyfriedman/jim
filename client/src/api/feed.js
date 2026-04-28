@@ -1,13 +1,4 @@
-/**
- * API base: empty VITE_API_BASE_URL → "/api" (Vite proxy or Apache ProxyPass).
- */
-export function getApiBase() {
-  const raw = import.meta.env.VITE_API_BASE_URL;
-  if (raw == null || String(raw).trim() === "") {
-    return "/api";
-  }
-  return String(raw).replace(/\/$/, "");
-}
+import { getApiBase } from "./auth.js";
 
 async function parseJsonBody(res) {
   const text = await res.text();
@@ -28,11 +19,13 @@ async function request(path, options = {}) {
   if (body != null) {
     headers["Content-Type"] = "application/json";
   }
+
   const res = await fetch(`${base}${path}`, {
     ...rest,
     body,
     headers
   });
+
   const data = await parseJsonBody(res);
   if (!res.ok) {
     const err = new Error(data.error || "Request failed");
@@ -42,23 +35,31 @@ async function request(path, options = {}) {
   return data;
 }
 
-export function apiLogin(username, password) {
-  return request("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ username, password })
-  });
-}
-
-export function apiRegister(username, email, password) {
-  return request("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({ username, email, password })
-  });
-}
-
-export function apiMe(token) {
-  return request("/auth/me", {
+export function apiGetFeed(token) {
+  return request("/feed", {
     method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}
+
+export function apiAddFeedComment(token, logId, comment) {
+  return request(`/feed/${logId}/comment`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ comment })
+  });
+}
+
+export function apiAddFeedHype(token, logId) {
+  return request(`/feed/${logId}/hype`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}
+
+export function apiRemoveFeedHype(token, logId) {
+  return request(`/feed/${logId}/hype`, {
+    method: "DELETE",
     headers: { Authorization: `Bearer ${token}` }
   });
 }

@@ -9,7 +9,7 @@ router.get("/", async (req, res, next) => {
   try {
     const logsResult = await withConnection((connection) =>
       connection.execute(
-        `SELECT log_id, log_date, is_private, notes, created_at
+        `SELECT log_id, log_date, is_private, title, description, hype_count, comment_count, notes, created_at
          FROM WORKOUT_LOG
          WHERE user_id = :userId
          ORDER BY log_date DESC, log_id DESC`,
@@ -52,6 +52,10 @@ router.get("/", async (req, res, next) => {
         log_id: row.LOG_ID,
         log_date: row.LOG_DATE,
         is_private: row.IS_PRIVATE,
+        title: row.TITLE,
+        description: row.DESCRIPTION,
+        hype_count: row.HYPE_COUNT ?? 0,
+        comment_count: row.COMMENT_COUNT ?? 0,
         notes: row.NOTES,
         created_at: row.CREATED_AT,
         entries: byLog.get(row.LOG_ID) || []
@@ -63,9 +67,12 @@ router.get("/", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  const { log_date, is_private = 0, notes = null, entries = [] } = req.body;
+  const { log_date, is_private = 0, title, description = null, notes = null, entries = [] } = req.body;
   if (!log_date) {
     return res.status(400).json({ error: "log_date is required." });
+  }
+  if (!title || typeof title !== "string") {
+    return res.status(400).json({ error: "title is required." });
   }
   if (!Array.isArray(entries) || entries.length === 0) {
     return res.status(400).json({ error: "entries must be a non-empty array." });
@@ -75,13 +82,15 @@ router.post("/", async (req, res, next) => {
     const created = await withConnection(async (connection) => {
       try {
         const logInsert = await connection.execute(
-          `INSERT INTO WORKOUT_LOG (user_id, log_date, is_private, notes)
-           VALUES (:userId, TO_DATE(:logDate, 'YYYY-MM-DD'), :isPrivate, :notes)
+          `INSERT INTO WORKOUT_LOG (user_id, log_date, is_private, title, description, hype_count, comment_count, notes)
+           VALUES (:userId, TO_DATE(:logDate, 'YYYY-MM-DD'), :isPrivate, :title, :description, 0, 0, :notes)
            RETURNING log_id INTO :logId`,
           {
             userId: req.user.userId,
             logDate: log_date,
             isPrivate: is_private,
+            title,
+            description,
             notes,
             logId: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
           }
@@ -130,14 +139,67 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.put("/:id", async (req, res, next) => {
+router.get("/:id/comments", async (req, res, next) => {
   const logId = Number(req.params.id);
-  const { log_date, is_private, notes, entries } = req.body;
-
   if (!Number.isFinite(logId)) {
     return res.status(400).json({ error: "Invalid log id." });
   }
 
+  try {
+    const ownership = await withConnection((connection) =>
+      connection.execute(
+        `SELECT is_private
+         FROM WORKOUT_LOG
+         WHERE log_id = :logId
+           AND user_id = :userId`,
+        { logId, userId: req.user.userId },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      )
+    );
+
+    if (!ownership.rows.length) {
+      return res.status(404).json({ error: "Workout log not found." });
+    }
+    if (ownership.rows[0].IS_PRIVATE === 1) {
+      return res.json({ comments: [] });
+    }
+
+    const comments = await withConnection((connection) =>
+      connection.execute(
+        `SELECT fc.comment_id, fc.user_id, u.username, u.profile_pic, fc.comment_text, fc.created_at
+         FROM FEED_COMMENT fc
+         JOIN USERS u ON u.user_id = fc.user_id
+         WHERE fc.log_id = :logId
+         ORDER BY fc.created_at ASC`,
+        { logId },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      )
+    );
+
+    return res.json({
+      comments: comments.rows.map((row) => ({
+        comment_id: row.COMMENT_ID,
+        user: {
+          user_id: row.USER_ID,
+          username: row.USERNAME,
+          profile_pic: row.PROFILE_PIC
+        },
+        comment: row.COMMENT_TEXT,
+        created_at: row.CREATED_AT
+      }))
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.put("/:id", async (req, res, next) => {
+  const logId = Number(req.params.id);
+  const { log_date, is_private, title, description, notes, entries } = req.body;
+
+  if (!Number.isFinite(logId)) {
+    return res.status(400).json({ error: "Invalid log id." });
+  }
   try {
     const updated = await withConnection(async (connection) => {
       try {
@@ -156,11 +218,15 @@ router.put("/:id", async (req, res, next) => {
           `UPDATE WORKOUT_LOG
            SET log_date = COALESCE(TO_DATE(:logDate, 'YYYY-MM-DD'), log_date),
                is_private = COALESCE(:isPrivate, is_private),
+               title = COALESCE(:title, title),
+               description = COALESCE(:description, description),
                notes = COALESCE(:notes, notes)
            WHERE log_id = :logId`,
           {
             logDate: log_date ?? null,
             isPrivate: is_private ?? null,
+            title: title ?? null,
+            description: description ?? null,
             notes: notes ?? null,
             logId
           }

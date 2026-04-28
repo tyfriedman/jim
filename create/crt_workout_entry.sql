@@ -12,4 +12,5 @@ create table WORKOUT_ENTRY (
   constraint fk_workout_entry_exercise foreign key (exercise_id) references EXERCISE(exercise_id)
 );
 
+
 exit;
