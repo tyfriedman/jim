@@ -11,13 +11,58 @@ body,
   margin: 0;
 }
 
+:root,
+html.theme-day {
+  --retro-text-shadow: #1a1a2e;
+  --retro-sky-top: #5c94fc;
+  --retro-sky-mid: #5c94fc;
+  --retro-horizon: #c84c0c;
+  --retro-ground: #6abf47;
+  --retro-celestial-border: #1a1a2e;
+  --retro-celestial-bg: #ffd54a;
+  --retro-celestial-shadow: #1a1a2e;
+  --retro-cloud-fill: #fff;
+  --retro-cloud-border: #1a1a2e;
+  --retro-cloud-shadow: #1a1a2e;
+  --retro-hill-main: #6abf47;
+  --retro-hill-alt: #4a9f32;
+  --retro-hill-highlight: rgba(255, 255, 255, 0.15);
+  --retro-night-stars-opacity: 0;
+}
+
+html.theme-night {
+  --retro-text-shadow: #05070f;
+  --retro-sky-top: #02040f;
+  --retro-sky-mid: #0a1230;
+  --retro-horizon: #15102f;
+  --retro-ground: #182730;
+  --retro-celestial-border: #1a1a2e;
+  --retro-celestial-bg: radial-gradient(circle at 35% 30%, #ffffff 0%, #dce3ff 60%, #c6cff7 100%);
+  --retro-celestial-shadow: #05070f;
+  --retro-cloud-fill: #fff;
+  --retro-cloud-border: #1a1a2e;
+  --retro-cloud-shadow: #1a1a2e;
+  --retro-hill-main: #1c3b34;
+  --retro-hill-alt: #132620;
+  --retro-hill-highlight: rgba(255, 255, 255, 0.05);
+  --retro-night-stars-opacity: 0.95;
+}
+
 body {
   font-family: "Press Start 2P", system-ui, sans-serif;
   font-size: 12px;
   line-height: 1.8;
   color: #fff;
-  text-shadow: 2px 2px 0 #1a1a2e;
-  background: linear-gradient(180deg, #5c94fc 0%, #5c94fc 55%, #c84c0c 55%, #c84c0c 62%, #6abf47 62%, #6abf47 100%);
+  text-shadow: 2px 2px 0 var(--retro-text-shadow);
+  background: linear-gradient(
+    180deg,
+    var(--retro-sky-top) 0%,
+    var(--retro-sky-mid) 55%,
+    var(--retro-horizon) 55%,
+    var(--retro-horizon) 62%,
+    var(--retro-ground) 62%,
+    var(--retro-ground) 100%
+  );
   image-rendering: pixelated;
 }
 
@@ -29,6 +74,54 @@ body {
   padding: 24px 16px 80px;
   position: relative;
   overflow: hidden;
+}
+
+.retro-page::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 45%;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 7% 10%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 16% 26%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 29% 14%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 43% 7%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 58% 17%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 71% 9%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 84% 22%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 11% 41%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 24% 34%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 37% 51%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 52% 43%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 68% 55%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 47%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 91% 37%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 6% 22%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 19% 8%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 33% 27%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 47% 16%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 63% 29%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 77% 13%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 89% 30%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 13% 58%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 28% 66%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 41% 61%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 57% 70%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 73% 63%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 86% 68%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 94% 57%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 9% 73%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 22% 78%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 74%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 48% 81%, #eaf2ff 0%, transparent 100%),
+    radial-gradient(3px 3px at 61% 76%, #ffffff 0%, transparent 100%),
+    radial-gradient(1px 1px at 74% 83%, #d6dfff 0%, transparent 100%),
+    radial-gradient(2px 2px at 87% 79%, #eaf2ff 0%, transparent 100%);
+  opacity: var(--retro-night-stars-opacity);
 }
 
 .retro-login {
@@ -44,12 +137,19 @@ body {
   right: 110px;
   width: clamp(44px, 6vw, 72px);
   height: clamp(44px, 6vw, 72px);
-  border: 4px solid #1a1a2e;
-  background: #ffd54a;
-  box-shadow: 4px 4px 0 #1a1a2e;
+  border: 4px solid var(--retro-celestial-border);
+  background: var(--retro-celestial-bg);
+  box-shadow: 4px 4px 0 var(--retro-celestial-shadow);
   image-rendering: pixelated;
   pointer-events: none;
   z-index: 2;
+}
+
+html.theme-night .retro-login::before,
+html.theme-night .retro-home::before {
+  box-shadow:
+    inset -14px 0 0 #8892c8,
+    4px 4px 0 var(--retro-celestial-shadow);
 }
 
 .retro-login .retro-title {
@@ -99,9 +199,9 @@ body {
 
 .retro-cloud {
   position: absolute;
-  background: #fff;
-  border: 4px solid #1a1a2e;
-  box-shadow: 4px 4px 0 #1a1a2e;
+  background: var(--retro-cloud-fill);
+  border: 4px solid var(--retro-cloud-border);
+  box-shadow: 4px 4px 0 var(--retro-cloud-shadow);
   image-rendering: crisp-edges;
   opacity: 0.95;
   left: -180px;
@@ -123,8 +223,8 @@ body {
 .retro-cloud--1::after {
   content: "";
   position: absolute;
-  background: #fff;
-  border: 4px solid #1a1a2e;
+  background: var(--retro-cloud-fill);
+  border: 4px solid var(--retro-cloud-border);
 }
 
 .retro-cloud--1::before {
@@ -156,8 +256,8 @@ body {
 .retro-cloud--2::after {
   content: "";
   position: absolute;
-  background: #fff;
-  border: 4px solid #1a1a2e;
+  background: var(--retro-cloud-fill);
+  border: 4px solid var(--retro-cloud-border);
 }
 
 .retro-cloud--2::before {
@@ -225,8 +325,8 @@ body {
 .retro-cloud--7::after {
   content: "";
   position: absolute;
-  background: #fff;
-  border: 4px solid #1a1a2e;
+  background: var(--retro-cloud-fill);
+  border: 4px solid var(--retro-cloud-border);
 }
 
 .retro-cloud--7::before {
@@ -258,8 +358,8 @@ body {
 .retro-cloud--8::after {
   content: "";
   position: absolute;
-  background: #fff;
-  border: 4px solid #1a1a2e;
+  background: var(--retro-cloud-fill);
+  border: 4px solid var(--retro-cloud-border);
 }
 
 .retro-cloud--8::before {
@@ -278,6 +378,11 @@ body {
   border-radius: 4px;
 }
 
+html.theme-night .retro-cloud {
+  opacity: 0;
+  animation: none;
+}
+
 
 
 .retro-hill {
@@ -288,13 +393,13 @@ body {
   height: 72px;
   background: repeating-linear-gradient(
     90deg,
-    #6abf47 0,
-    #6abf47 24px,
-    #4a9f32 24px,
-    #4a9f32 28px
+    var(--retro-hill-main) 0,
+    var(--retro-hill-main) 24px,
+    var(--retro-hill-alt) 24px,
+    var(--retro-hill-alt) 28px
   );
   border-top: 4px solid #1a1a2e;
-  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 4px 0 var(--retro-hill-highlight);
 }
 
 .retro-gym-prop {
@@ -632,6 +737,15 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.retro-theme-toggle-screen {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 5;
+  min-width: 68px;
+  text-align: center;
 }
 
 .retro-home-username {
@@ -2333,9 +2447,9 @@ body {
   gap: 10px;
 }
 
-.retro-challenge-card--medium { background: #2d1f73; }
-.retro-challenge-card--hard   { background: #731f1f; }
-.retro-challenge-card--claimed { opacity: 0.55; }
+.retro-challenge-card--medium { background: #1f3b73; }
+.retro-challenge-card--hard   { background: #1f3b73; }
+.retro-challenge-card--claimed { opacity: 1; }
 
 .retro-challenge-card-header {
   display: flex;

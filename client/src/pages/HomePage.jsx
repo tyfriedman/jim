@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
 import { apiGetAchievements } from "../api/achievements.js";
 import { apiGetFriendRequests } from "../api/friends.js";
@@ -113,6 +114,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, coins, userId, token } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [avatarXp, setAvatarXp] = useState(null);
   const [avatarLevel, setAvatarLevel] = useState(null);
   const swipeDirection = location.state?.swipeDirection;
@@ -466,6 +468,14 @@ export default function HomePage() {
         className="retro-gym-prop retro-gym-prop--home retro-gym-prop--home-jumprope"
       />
 
+      <button
+        type="button"
+        className="retro-btn retro-btn--ghost retro-btn--small retro-theme-toggle-screen"
+        onClick={toggleTheme}
+      >
+        {theme === "night" ? "Night" : "Day"}
+      </button>
+
       <div className="retro-home-hud">
         <p className="retro-brand retro-brand--home">JIM</p>
         {avatarLevel !== null && (
@@ -538,7 +548,7 @@ export default function HomePage() {
           <button
             type="button"
             className="retro-nav-block"
-            onClick={() => navigate("/shop", { state: { homeEntrySide: "left" } })}
+            onClick={() => navigate("/achievements", { state: { homeEntrySide: "left" } })}
           >
             Achievements
           </button>
@@ -608,7 +618,7 @@ export default function HomePage() {
           <button
             type="button"
             className="retro-nav-block"
-            onClick={() => navigate("/profile", { state: { homeEntrySide: "right" } })}
+            onClick={() => navigate("/shop", { state: { homeEntrySide: "right" } })}
           >
             Shop
           </button>

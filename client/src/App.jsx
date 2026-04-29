@@ -5,7 +5,7 @@ import HomePage from "./pages/HomePage.jsx";
 import WorkoutsPage from "./pages/WorkoutsPage.jsx";
 import FriendsPage from "./pages/FriendsPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-import ChallengesPage from "./pages/ChallengesPage.jsx";
+import AchievementsPage from "./pages/AchievementsPage.jsx";
 import ClosetPage from "./pages/ClosetPage.jsx";
 import CompetitionChallengesPage from "./pages/CompetitionChallengesPage.jsx";
 
@@ -70,7 +70,15 @@ export default function App() {
         path="/shop"
         element={
           <PrivateRoute>
-            <ChallengesPage />
+            <ShopPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/achievements"
+        element={
+          <PrivateRoute>
+            <AchievementsPage />
           </PrivateRoute>
         }
       />
@@ -92,11 +100,7 @@ export default function App() {
       />
       <Route
         path="/profile"
-        element={
-          <PrivateRoute>
-            <ShopPage />
-          </PrivateRoute>
-        }
+        element={<Navigate to="/shop" replace />}
       />
       <Route
         path="/closet"

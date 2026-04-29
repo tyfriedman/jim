@@ -23,7 +23,7 @@ function saveClaimed(userId, claimedSet) {
   localStorage.setItem(getClaimedKey(userId), JSON.stringify([...claimedSet]));
 }
 
-export default function ChallengesPage() {
+export default function AchievementsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { token, userId, updateCoins } = useAuth();
@@ -76,7 +76,7 @@ export default function ChallengesPage() {
 
   return (
     <div
-      className={`retro-page retro-section retro-goals-page retro-challenges retro-scene ${
+      className={`retro-page retro-section retro-goals-page retro-scene ${
         swipeDirection === "left"
           ? "retro-scene--swipe-left"
           : swipeDirection === "right"
@@ -92,7 +92,7 @@ export default function ChallengesPage() {
       <div className="retro-cloud retro-cloud--6" aria-hidden />
       <div className="retro-cloud retro-cloud--7" aria-hidden />
       <div className="retro-cloud retro-cloud--8" aria-hidden />
-      <div className="retro-challenges-floor" aria-hidden />
+      <div className="retro-hill" aria-hidden />
 
       <div className="retro-home-hud">
         <p className="retro-brand retro-brand--home">Jim</p>

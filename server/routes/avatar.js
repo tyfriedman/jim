@@ -158,7 +158,7 @@ router.post("/buy", async (req, res, next) => {
     const newCoins = await withConnection(async (connection) => {
       try {
         const itemRes = await connection.execute(
-          `SELECT xp_required
+          `SELECT item_id, xp_required
            FROM AVATAR_ITEM
            WHERE unlock_condition = :itemId`,
           { itemId },
@@ -168,6 +168,7 @@ router.post("/buy", async (req, res, next) => {
         if (!item) {
           throw Object.assign(new Error("Item not found."), { statusCode: 404 });
         }
+        const dbItemId = Number(item.ITEM_ID);
         const price = Number(item.XP_REQUIRED) || 0;
 
         const coinRes = await connection.execute(
@@ -188,6 +189,37 @@ router.post("/buy", async (req, res, next) => {
           "UPDATE USERS SET coins = :coins WHERE user_id = :userId",
           { coins: updated, userId: req.user.userId }
         );
+
+        const avatarRes = await connection.execute(
+          "SELECT avatar_id FROM AVATAR WHERE user_id = :userId",
+          { userId: req.user.userId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        const avatar = avatarRes.rows[0];
+        if (!avatar) {
+          throw Object.assign(new Error("Avatar not found."), { statusCode: 404 });
+        }
+
+        // Persist ownership per item so closet survives browser storage resets/origin changes.
+        await connection.execute(
+          `MERGE INTO AVATAR_INVENTORY ai
+           USING (
+             SELECT :avatarId AS avatar_id, :slot AS slot, :dbItemId AS item_id
+             FROM dual
+           ) src
+           ON (ai.avatar_id = src.avatar_id AND ai.slot = src.slot)
+           WHEN MATCHED THEN
+             UPDATE SET ai.item_id = src.item_id
+           WHEN NOT MATCHED THEN
+             INSERT (avatar_id, slot, item_id, equipped)
+             VALUES (src.avatar_id, src.slot, src.item_id, 0)`,
+          {
+            avatarId: avatar.AVATAR_ID,
+            slot: `owned:${itemId}`,
+            dbItemId
+          }
+        );
+
         await connection.commit();
         return updated;
       } catch (err) {

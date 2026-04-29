@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { apiBuyItem, apiGetShopItems } from "../api/shop.js";
+import { apiBuyItem, apiGetAvatar, apiGetShopItems } from "../api/shop.js";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
 
 const CATEGORIES = [
@@ -26,6 +26,15 @@ function loadOwned(userId) {
 
 function saveOwned(userId, ownedSet) {
   localStorage.setItem(getOwnedKey(userId), JSON.stringify([...ownedSet]));
+}
+
+function extractOwnedFromAvatar(avatar) {
+  const inventory = Array.isArray(avatar?.inventory) ? avatar.inventory : [];
+  return new Set(
+    inventory
+      .map((entry) => entry?.item?.unlock_condition)
+      .filter((id) => typeof id === "string" && id.trim() !== "")
+  );
 }
 
 export default function ShopPage() {
@@ -74,6 +83,29 @@ export default function ShopPage() {
       cancelled = true;
     };
   }, [token]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function syncOwnedFromBackend() {
+      try {
+        const avatar = await apiGetAvatar(token);
+        if (cancelled) return;
+        const localOwned = loadOwned(userId);
+        const backendOwned = extractOwnedFromAvatar(avatar);
+        const merged = new Set([...localOwned, ...backendOwned]);
+        saveOwned(userId, merged);
+        setOwned(merged);
+      } catch {
+        if (!cancelled) {
+          setOwned(loadOwned(userId));
+        }
+      }
+    }
+    syncOwnedFromBackend();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, userId]);
 
   const visibleItems = shopItems.filter((item) => item.category === activeCategory);
 

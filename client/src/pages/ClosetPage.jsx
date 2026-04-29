@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
-import { apiGetEquippedAvatar, apiSaveEquippedAvatar } from "../api/shop.js";
+import { apiGetAvatar, apiGetEquippedAvatar, apiSaveEquippedAvatar } from "../api/shop.js";
 
 const CATEGORIES = [
   { id: "hat", label: "Hat" },
@@ -75,6 +75,19 @@ function saveEquipped(userId, equipped) {
   localStorage.setItem(getEquippedKey(userId), JSON.stringify(equipped));
 }
 
+function saveOwned(userId, ownedSet) {
+  localStorage.setItem(getOwnedKey(userId), JSON.stringify([...ownedSet]));
+}
+
+function extractOwnedFromAvatar(avatar) {
+  const inventory = Array.isArray(avatar?.inventory) ? avatar.inventory : [];
+  return new Set(
+    inventory
+      .map((entry) => entry?.item?.unlock_condition)
+      .filter((id) => typeof id === "string" && id.trim() !== "")
+  );
+}
+
 function normalizeEquipped(raw) {
   return {
     hat: typeof raw?.hat === "string" ? raw.hat : null,
@@ -98,6 +111,7 @@ export default function ClosetPage() {
     (swipeDirection === "left" ? "right" : swipeDirection === "right" ? "left" : "right");
   const [activeCategory, setActiveCategory] = useState("hat");
   const [equipped, setEquipped] = useState(() => loadEquipped(userId));
+  const [ownedIds, setOwnedIds] = useState(() => loadOwned(userId));
   const [avatarPhase, setAvatarPhase] = useState("runIn");
   const [avatarOffsetX, setAvatarOffsetX] = useState(AVATAR_START_OFFSET_X);
   const [avatarFrame, setAvatarFrame] = useState(0);
@@ -128,6 +142,27 @@ export default function ClosetPage() {
       window.clearTimeout(idleTimer);
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const localOwned = loadOwned(userId);
+    apiGetAvatar(token)
+      .then((avatar) => {
+        if (cancelled) return;
+        const backendOwned = extractOwnedFromAvatar(avatar);
+        const merged = new Set([...localOwned, ...backendOwned]);
+        saveOwned(userId, merged);
+        setOwnedIds(merged);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOwnedIds(localOwned);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, userId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -178,8 +213,6 @@ export default function ClosetPage() {
     animationFrameId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(animationFrameId);
   }, [avatarAnimation]);
-
-  const ownedIds = useMemo(() => loadOwned(userId), [userId]);
 
   const ownedItems = useMemo(
     () => SHOP_ITEMS.filter((item) => ownedIds.has(item.id)),
