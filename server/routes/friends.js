@@ -282,10 +282,13 @@ router.get("/", async (req, res, next) => {
            CASE WHEN f.user_id_1 = :userId THEN f.user_id_2 ELSE f.user_id_1 END AS friend_id,
            u.username,
            u.profile_pic,
-           f.created_at
+           f.created_at,
+           NVL(a.avatar_level, 1) AS avatar_level,
+           NVL(a.xp, 0) AS xp
          FROM FRIENDSHIP f
          JOIN USERS u
            ON u.user_id = CASE WHEN f.user_id_1 = :userId THEN f.user_id_2 ELSE f.user_id_1 END
+         LEFT JOIN AVATAR a ON a.user_id = u.user_id
          WHERE (f.user_id_1 = :userId OR f.user_id_2 = :userId)
            AND f.status = 'accepted'
          ORDER BY f.created_at DESC`,
@@ -299,7 +302,9 @@ router.get("/", async (req, res, next) => {
         user_id: row.FRIEND_ID,
         username: row.USERNAME,
         profile_pic: row.PROFILE_PIC,
-        friends_since: row.CREATED_AT
+        friends_since: row.CREATED_AT,
+        avatar_level: row.AVATAR_LEVEL,
+        xp: row.XP
       }))
     );
   } catch (error) {

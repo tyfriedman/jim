@@ -9,6 +9,7 @@ import {
   apiGetChallenges,
   apiInviteToChallenge,
   apiJoinChallenge,
+  apiLogChallengeEntry,
 } from "../api/challenges.js";
 
 function toDateInputValue(value) {
@@ -51,6 +52,10 @@ export default function CompetitionChallengesPage() {
   const [joiningChallengeId, setJoiningChallengeId] = useState(null);
   const [invitingChallengeId, setInvitingChallengeId] = useState(null);
   const [inviteTargets, setInviteTargets] = useState({});
+  const [logValues, setLogValues] = useState({});
+  const [loggingChallengeId, setLoggingChallengeId] = useState(null);
+
+  const [activeTab, setActiveTab] = useState("create");
 
   const [form, setForm] = useState(() => ({
     title: "",
@@ -188,6 +193,25 @@ export default function CompetitionChallengesPage() {
     }
   }
 
+  async function handleLogEntry(challengeId) {
+    const value = Number(logValues[challengeId]);
+    if (!value || value <= 0) {
+      setError("Enter a value greater than 0.");
+      return;
+    }
+    setLoggingChallengeId(challengeId);
+    setError("");
+    try {
+      await apiLogChallengeEntry(token, challengeId, value);
+      setLogValues((prev) => ({ ...prev, [challengeId]: "" }));
+      await loadLeaderboard(challengeId);
+    } catch (err) {
+      setError(err.message || "Failed to log entry.");
+    } finally {
+      setLoggingChallengeId(null);
+    }
+  }
+
   async function handleInvite(challengeId) {
     const targetId = Number(inviteTargets[challengeId] || 0);
     if (!Number.isFinite(targetId) || targetId <= 0) {
@@ -241,8 +265,24 @@ export default function CompetitionChallengesPage() {
       <div className="retro-challenges-shell retro-challengehub-shell">
         <h1 className="retro-title">Challenges</h1>
 
-        <div className="retro-panel retro-panel--wide">
-          <h2 className="retro-title retro-workout-subtitle">Create Challenge</h2>
+        <div className="retro-mode-toggle">
+          <button
+            type="button"
+            className={`retro-tab${activeTab === "create" ? " retro-tab--active" : ""}`}
+            onClick={() => setActiveTab("create")}
+          >
+            Create
+          </button>
+          <button
+            type="button"
+            className={`retro-tab${activeTab === "leaderboard" ? " retro-tab--active" : ""}`}
+            onClick={() => setActiveTab("leaderboard")}
+          >
+            Leaderboard
+          </button>
+        </div>
+
+        {activeTab === "create" && <div className="retro-panel retro-panel--wide">
           <form className="retro-form" onSubmit={handleCreateChallenge}>
             <label className="retro-field">
               <span className="retro-label">Title</span>
@@ -351,15 +391,10 @@ export default function CompetitionChallengesPage() {
               </button>
             </div>
           </form>
-        </div>
+        </div>}
 
-        {error ? (
-          <div className="retro-banner retro-banner--error" role="alert">
-            {error}
-          </div>
-        ) : null}
-
-        {loading ? (
+        {activeTab === "leaderboard" && (
+          loading ? (
           <div className="retro-challenges-loading">Loading...</div>
         ) : (
           <div className="retro-challenges-list">
@@ -450,13 +485,40 @@ export default function CompetitionChallengesPage() {
                       <p className="retro-challenge-progress-label">
                         Your progress: {userRow?.total_value ?? 0} / {challenge.target_value}
                       </p>
+                      <div className="retro-actions">
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="0.1"
+                          className="retro-input"
+                          placeholder={`Log ${challenge.exercise_name} value`}
+                          value={logValues[challenge.challenge_id] ?? ""}
+                          onChange={(ev) =>
+                            setLogValues((prev) => ({ ...prev, [challenge.challenge_id]: ev.target.value }))
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="retro-btn retro-btn--primary retro-btn--small"
+                          disabled={loggingChallengeId === challenge.challenge_id}
+                          onClick={() => handleLogEntry(challenge.challenge_id)}
+                        >
+                          {loggingChallengeId === challenge.challenge_id ? "Logging..." : "Log Progress"}
+                        </button>
+                      </div>
                     </div>
                   ) : null}
                 </article>
               );
             })}
           </div>
-        )}
+        ))}
+
+        {error ? (
+          <div className="retro-banner retro-banner--error" role="alert">
+            {error}
+          </div>
+        ) : null}
       </div>
     </div>
   );

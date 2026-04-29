@@ -260,6 +260,91 @@ router.post("/:id/invite", async (req, res, next) => {
   }
 });
 
+router.post("/:id/log", async (req, res, next) => {
+  const challengeId = Number(req.params.id);
+  const value = Number(req.body.value);
+  if (!Number.isFinite(challengeId)) {
+    return res.status(400).json({ error: "Invalid challenge id." });
+  }
+  if (!Number.isFinite(value) || value <= 0) {
+    return res.status(400).json({ error: "value must be a positive number." });
+  }
+
+  try {
+    await withConnection(async (connection) => {
+      try {
+        const challengeRes = await connection.execute(
+          `SELECT c.challenge_id, c.exercise_id, c.title
+           FROM CHALLENGE c
+           WHERE c.challenge_id = :challengeId`,
+          { challengeId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        const challenge = challengeRes.rows[0];
+        if (!challenge) {
+          throw Object.assign(new Error("Challenge not found."), { statusCode: 404 });
+        }
+
+        const participantRes = await connection.execute(
+          `SELECT 1 FROM CHALLENGE_PARTICIPANT
+           WHERE challenge_id = :challengeId AND user_id = :userId`,
+          { challengeId, userId: req.user.userId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        if (participantRes.rows.length === 0) {
+          throw Object.assign(new Error("You must join this challenge before logging entries."), { statusCode: 403 });
+        }
+
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+        const logInsert = await connection.execute(
+          `INSERT INTO WORKOUT_LOG (user_id, log_date, is_private, title, description, hype_count, comment_count, notes)
+           VALUES (:userId, TO_DATE(:logDate, 'YYYY-MM-DD'), 0, :title, NULL, 0, 0, NULL)
+           RETURNING log_id INTO :logId`,
+          {
+            userId: req.user.userId,
+            logDate: today,
+            title: `Challenge: ${challenge.TITLE}`,
+            logId: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+          }
+        );
+        const logId = logInsert.outBinds.logId[0];
+
+        await connection.execute(
+          `INSERT INTO WORKOUT_ENTRY (log_id, exercise_id, value, sets, notes)
+           VALUES (:logId, :exerciseId, :value, NULL, NULL)`,
+          { logId, exerciseId: challenge.EXERCISE_ID, value }
+        );
+
+        await connection.execute(
+          `UPDATE AVATAR
+           SET avatar_level = avatar_level + FLOOR((xp + 10) / 50),
+               xp = MOD(xp + 10, 50)
+           WHERE user_id = :userId`,
+          { userId: req.user.userId }
+        );
+        await connection.execute(
+          "UPDATE USERS SET coins = coins + 2 WHERE user_id = :userId",
+          { userId: req.user.userId }
+        );
+
+        await connection.commit();
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      }
+    });
+
+    return res.json({ success: true });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return next(error);
+  }
+});
+
 router.get("/:id/leaderboard", async (req, res, next) => {
   const challengeId = Number(req.params.id);
   if (!Number.isFinite(challengeId)) {

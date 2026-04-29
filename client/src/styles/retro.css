@@ -587,6 +587,47 @@ body {
     6px 6px 0 #1a1a2e;
 }
 
+.retro-xp-hud {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.retro-xp-level {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fce300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.retro-xp-bar {
+  width: 80px;
+  height: 10px;
+  background: #1a1a2e;
+  border: 2px solid #1a1a2e;
+  overflow: hidden;
+}
+
+.retro-xp-bar-fill {
+  height: 100%;
+  background: #fce300;
+  transition: width 0.4s ease;
+}
+
+.retro-xp-label {
+  font-family: inherit;
+  font-size: 9px;
+  color: #fce300;
+  white-space: nowrap;
+}
+
+.retro-friends-hub-item--self {
+  border-left: 3px solid #fce300;
+}
+
 .retro-home-hud-actions {
   display: flex;
   align-items: center;
@@ -653,7 +694,7 @@ body {
 }
 
 .retro-home .retro-nav-block {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .retro-home-nav-label {
@@ -2213,6 +2254,7 @@ body {
 
 .retro-challengehub-shell {
   width: min(920px, 100%);
+  align-items: center;
 }
 
 .retro-challengehub-grid {

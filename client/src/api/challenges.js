@@ -60,6 +60,14 @@ export function apiInviteToChallenge(token, challengeId, userId) {
   });
 }
 
+export function apiLogChallengeEntry(token, challengeId, value) {
+  return request(`/challenges/${challengeId}/log`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ value }),
+  });
+}
+
 export function apiGetChallengeLeaderboard(token, challengeId) {
   return request(`/challenges/${challengeId}/leaderboard`, {
     method: "GET",

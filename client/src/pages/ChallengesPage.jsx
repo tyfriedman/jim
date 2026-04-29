@@ -106,7 +106,7 @@ export default function ChallengesPage() {
       </div>
 
       <div className="retro-challenges-shell">
-        <h1 className="retro-title">Goals</h1>
+        <h1 className="retro-title">Achievements</h1>
 
         {error && (
           <div className="retro-banner retro-banner--error" role="alert">

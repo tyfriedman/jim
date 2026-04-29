@@ -18,7 +18,7 @@ import {
   apiSendFriendRequest
 } from "../api/friends.js";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
-import { apiGetEquippedAvatar } from "../api/shop.js";
+import { apiGetAvatar, apiGetEquippedAvatar } from "../api/shop.js";
 
 const EQUIPPED_ITEM_IMAGE_BY_ID = {
   yellow: "/sprites/purchases/Body/Yellow%20128x128px.png",
@@ -96,7 +96,7 @@ function normalizeCount(value) {
 }
 
 export default function FriendsPage() {
-  const { token } = useAuth();
+  const { token, userId, username } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const swipeDirection = location.state?.swipeDirection;
@@ -123,6 +123,15 @@ export default function FriendsPage() {
   const [friendRunStarted, setFriendRunStarted] = useState(false);
   const [friendAvatarMode, setFriendAvatarMode] = useState("run");
   const [equippedByFriendId, setEquippedByFriendId] = useState({});
+  const [ownAvatar, setOwnAvatar] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiGetAvatar(token)
+      .then((data) => { if (!cancelled && data) setOwnAvatar(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [token]);
 
   const isBusy = useMemo(
     () => (key) => Boolean(actionLoading[key]),
@@ -418,6 +427,34 @@ export default function FriendsPage() {
     } finally {
       setLoadingKey(key, false);
     }
+  }
+
+  function renderLeaderboardTab() {
+    const selfEntry = ownAvatar
+      ? { user_id: userId, username: username ?? "You", avatar_level: ownAvatar.avatar_level ?? 1, xp: ownAvatar.xp ?? 0, isSelf: true }
+      : null;
+    const entries = [
+      ...(selfEntry ? [selfEntry] : []),
+      ...friends.map((f) => ({ user_id: f.user_id, username: f.username, avatar_level: f.avatar_level ?? 1, xp: f.xp ?? 0, isSelf: false })),
+    ].sort((a, b) => b.avatar_level - a.avatar_level || b.xp - a.xp);
+
+    if (entries.length === 0) {
+      return <p className="retro-hint">Add friends to see the leaderboard.</p>;
+    }
+    return (
+      <div className="retro-friends-hub-list">
+        {entries.map((entry, i) => (
+          <div key={entry.user_id} className={`retro-friends-hub-item${entry.isSelf ? " retro-friends-hub-item--self" : ""}`}>
+            <p className="retro-friends-hub-name">#{i + 1} {entry.username}{entry.isSelf ? " (You)" : ""}</p>
+            <p className="retro-xp-level">Lv.{entry.avatar_level}</p>
+            <div className="retro-xp-bar">
+              <div className="retro-xp-bar-fill" style={{ width: `${(entry.xp / 50) * 100}%` }} />
+            </div>
+            <p className="retro-xp-label">{entry.xp}/50 XP</p>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   function renderFriendsTab() {
@@ -813,6 +850,13 @@ export default function FriendsPage() {
               </button>
               <button
                 type="button"
+                className={`retro-tab ${activeHubTab === "leaderboard" ? "retro-tab--active" : ""}`}
+                onClick={() => setActiveHubTab("leaderboard")}
+              >
+                Ranks
+              </button>
+              <button
+                type="button"
                 className={`retro-tab ${
                   activeHubTab === "requests_and_add" ? "retro-tab--active" : ""
                 }`}
@@ -823,7 +867,9 @@ export default function FriendsPage() {
             </div>
 
             <div className="retro-friends-hub-content">
-              {activeHubTab === "friends" ? renderFriendsTab() : renderRequestsAndAddTab()}
+              {activeHubTab === "friends" ? renderFriendsTab()
+                : activeHubTab === "leaderboard" ? renderLeaderboardTab()
+                : renderRequestsAndAddTab()}
             </div>
           </aside>
         </div>

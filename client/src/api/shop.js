@@ -16,6 +16,13 @@ async function request(path, options = {}) {
   return data;
 }
 
+export function apiGetAvatar(token) {
+  return request("/avatar", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function apiBuyItem(token, price) {
   return request("/avatar/buy", {
     method: "POST",

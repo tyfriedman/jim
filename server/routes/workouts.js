@@ -115,7 +115,10 @@ router.post("/", async (req, res, next) => {
         const xpGain = entries.length * 10;
         const coinGain = entries.length * 2;
         await connection.execute(
-          "UPDATE AVATAR SET xp = xp + :xpGain WHERE user_id = :userId",
+          `UPDATE AVATAR
+           SET avatar_level = avatar_level + FLOOR((xp + :xpGain) / 50),
+               xp           = MOD(xp + :xpGain, 50)
+           WHERE user_id = :userId`,
           { xpGain, userId: req.user.userId }
         );
         await connection.execute(

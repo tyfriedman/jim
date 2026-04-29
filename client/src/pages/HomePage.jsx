@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
 import { apiGetAchievements } from "../api/achievements.js";
 import { apiGetFriendRequests } from "../api/friends.js";
-import { apiGetEquippedAvatar, apiSaveEquippedAvatar } from "../api/shop.js";
+import { apiGetAvatar, apiGetEquippedAvatar, apiSaveEquippedAvatar } from "../api/shop.js";
 
 const HOME_AVATAR_FRAME_COUNTS = [5, 8, 2, 2, 2];
 const AVATAR_PHASES = {
@@ -112,6 +112,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, coins, userId, token } = useAuth();
+  const [avatarXp, setAvatarXp] = useState(null);
+  const [avatarLevel, setAvatarLevel] = useState(null);
   const swipeDirection = location.state?.swipeDirection;
   const homeEntrySide =
     location.state?.homeEntrySide ||
@@ -282,6 +284,14 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
+  }, [token]);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiGetAvatar(token)
+      .then((data) => { if (!cancelled && data) { setAvatarXp(data.xp ?? 0); setAvatarLevel(data.avatar_level ?? 1); } })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, [token]);
 
   useEffect(() => {
@@ -457,6 +467,15 @@ export default function HomePage() {
 
       <div className="retro-home-hud">
         <p className="retro-brand retro-brand--home">JIM</p>
+        {avatarLevel !== null && (
+          <div className="retro-xp-hud">
+            <span className="retro-xp-level">Lv.{avatarLevel}</span>
+            <div className="retro-xp-bar">
+              <div className="retro-xp-bar-fill" style={{ width: `${((avatarXp ?? 0) / 50) * 100}%` }} />
+            </div>
+            <span className="retro-xp-label">{avatarXp ?? 0}/50</span>
+          </div>
+        )}
         <div className="retro-home-hud-actions">
           <span className="retro-coins-badge">
             <img className="retro-coin-inline retro-coin-inline--hud" src="/sprites/coin.png" alt="" aria-hidden />
@@ -520,7 +539,7 @@ export default function HomePage() {
             className="retro-nav-block"
             onClick={() => navigate("/shop", { state: { homeEntrySide: "left" } })}
           >
-            Goals
+            Achievements
           </button>
           <button
             type="button"
