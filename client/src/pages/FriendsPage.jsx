@@ -17,6 +17,57 @@ import {
   apiSearchUsers,
   apiSendFriendRequest
 } from "../api/friends.js";
+import SpriteAnimator from "../components/SpriteAnimator.jsx";
+import { apiGetEquippedAvatar } from "../api/shop.js";
+
+const EQUIPPED_ITEM_IMAGE_BY_ID = {
+  yellow: "/sprites/purchases/Body/Yellow%20128x128px.png",
+  turquoise: "/sprites/purchases/Body/Turquoise%20128x128px.png",
+  purple: "/sprites/purchases/Body/Purple%20128x128px.png",
+  eyes1: "/sprites/purchases/Eyes-glasses/Eyes1%20128x128px.png",
+  eyes2: "/sprites/purchases/Eyes-glasses/Eyes2%20128x128px.png",
+  eyes3: "/sprites/purchases/Eyes-glasses/Eyes3%20128x128px.png",
+  blackglasses: "/sprites/purchases/Eyes-glasses/Black%20glasses%20128x128px.png",
+  eyepatch: "/sprites/purchases/Eyes-glasses/Eye%20patch%20128x128px.png",
+  monocle: "/sprites/purchases/Eyes-glasses/Monocle%20128x128px.png",
+  cig: "/sprites/purchases/Beard-mouth/Cig%20128x128px.png",
+  clownnose: "/sprites/purchases/Beard-mouth/Clown%20nose%20128x128px.png",
+  crookedteeth: "/sprites/purchases/Beard-mouth/Crooked%20teeth%20128x128px.png",
+  mustache: "/sprites/purchases/Beard-mouth/Mustache%20128x128px.png",
+  tongue: "/sprites/purchases/Beard-mouth/Tongue%20128x128px.png",
+  bandana: "/sprites/purchases/Hat-hair/Bandana%20128x128px.png",
+  hat1: "/sprites/purchases/Hat-hair/Hat1%20128x128px.png",
+  hat2: "/sprites/purchases/Hat-hair/Hat2%20128x128px.png",
+  hat3: "/sprites/purchases/Hat-hair/Hat3%20128x128px.png",
+  hair1: "/sprites/purchases/Hat-hair/hair1%20128x128px.png",
+  hair2: "/sprites/purchases/Hat-hair/hair2%20128x128px.png"
+};
+const EQUIPPED_PROFILE_PREFIX = "jim-equipped:";
+
+function normalizeEquipped(raw) {
+  return {
+    body: typeof raw?.body === "string" ? raw.body : null,
+    eyes: typeof raw?.eyes === "string" ? raw.eyes : null,
+    mouth: typeof raw?.mouth === "string" ? raw.mouth : null,
+    hat: typeof raw?.hat === "string" ? raw.hat : null
+  };
+}
+
+function hasAnyEquipped(equipped) {
+  return Boolean(equipped?.body || equipped?.eyes || equipped?.mouth || equipped?.hat);
+}
+
+function parseEquippedFromProfilePic(profilePic) {
+  const value = String(profilePic || "");
+  if (!value.startsWith(EQUIPPED_PROFILE_PREFIX)) {
+    return normalizeEquipped({});
+  }
+  try {
+    return normalizeEquipped(JSON.parse(value.slice(EQUIPPED_PROFILE_PREFIX.length)));
+  } catch {
+    return normalizeEquipped({});
+  }
+}
 
 function formatDate(value) {
   if (!value) {
@@ -45,11 +96,13 @@ function normalizeCount(value) {
 }
 
 export default function FriendsPage() {
-  const { token, username } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const swipeDirection = location.state?.swipeDirection;
-  const backDirection = swipeDirection === "left" ? "right" : "left";
+  const returnHomeSide =
+    location.state?.homeEntrySide ||
+    (swipeDirection === "left" ? "right" : swipeDirection === "right" ? "left" : "right");
 
   const [feed, setFeed] = useState([]);
   const [friends, setFriends] = useState([]);
@@ -67,7 +120,9 @@ export default function FriendsPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState("");
   const [socialError, setSocialError] = useState("");
-  const [socialMessage, setSocialMessage] = useState("");
+  const [friendRunStarted, setFriendRunStarted] = useState(false);
+  const [friendAvatarMode, setFriendAvatarMode] = useState("run");
+  const [equippedByFriendId, setEquippedByFriendId] = useState({});
 
   const isBusy = useMemo(
     () => (key) => Boolean(actionLoading[key]),
@@ -113,6 +168,59 @@ export default function FriendsPage() {
     };
   }, [token]);
 
+  useEffect(() => {
+    setFriendRunStarted(false);
+    setFriendAvatarMode("run");
+
+    const startTimer = window.setTimeout(() => {
+      setFriendRunStarted(true);
+    }, 20);
+
+    const settleDelayMs = 900 + Math.max(0, friends.length - 1) * 120 + 120;
+    const idleTimer = window.setTimeout(() => {
+      setFriendAvatarMode("idle");
+    }, settleDelayMs);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      window.clearTimeout(idleTimer);
+    };
+  }, [friends.length]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFriendsEquipped() {
+      const next = {};
+      const targetIds = [
+        ...new Set([
+          ...friends.map((friend) => Number(friend.user_id)),
+          ...feed.map((log) => Number(log.user?.user_id))
+        ])
+      ].filter((id) => Number.isFinite(id));
+      await Promise.all(
+        targetIds.map(async (friendUserId) => {
+          try {
+            const data = await apiGetEquippedAvatar(token, friendUserId);
+            next[friendUserId] = normalizeEquipped(data?.equipped || {});
+          } catch {
+            next[friendUserId] = normalizeEquipped({});
+          }
+        })
+      );
+      if (!cancelled) {
+        setEquippedByFriendId(next);
+      }
+    }
+    if (friends.length > 0 || feed.length > 0) {
+      loadFriendsEquipped();
+    } else {
+      setEquippedByFriendId({});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [friends, feed, token]);
+
   function setLoadingKey(key, nextValue) {
     setActionLoading((prev) => {
       if (!nextValue && !prev[key]) {
@@ -157,10 +265,8 @@ export default function FriendsPage() {
     const key = `send-${userId}`;
     setLoadingKey(key, true);
     setSocialError("");
-    setSocialMessage("");
     try {
       await apiSendFriendRequest(token, userId);
-      setSocialMessage("Friend request sent.");
       await refreshSocialData();
       setSearchResults((prev) =>
         prev.map((user) =>
@@ -178,14 +284,12 @@ export default function FriendsPage() {
     const key = `${type}-${userId}`;
     setLoadingKey(key, true);
     setSocialError("");
-    setSocialMessage("");
     try {
       if (type === "accept") {
         await apiAcceptFriendRequest(token, userId);
       } else {
         await apiDeclineFriendRequest(token, userId);
       }
-      setSocialMessage(type === "accept" ? "Friend request accepted." : "Friend request declined.");
       await refreshSocialData();
       if (type === "accept") {
         const updatedFeed = await apiGetFeed(token);
@@ -202,10 +306,8 @@ export default function FriendsPage() {
     const key = `cancel-${userId}`;
     setLoadingKey(key, true);
     setSocialError("");
-    setSocialMessage("");
     try {
       await apiCancelFriendRequest(token, userId);
-      setSocialMessage("Friend request canceled.");
       await refreshSocialData();
     } catch (err) {
       setSocialError(err.message || "Failed to cancel request.");
@@ -218,10 +320,8 @@ export default function FriendsPage() {
     const key = `remove-${userId}`;
     setLoadingKey(key, true);
     setSocialError("");
-    setSocialMessage("");
     try {
       await apiRemoveFriend(token, userId);
-      setSocialMessage("Friend removed.");
       await refreshSocialData();
       const updatedFeed = await apiGetFeed(token);
       setFeed(Array.isArray(updatedFeed) ? updatedFeed : []);
@@ -484,7 +584,7 @@ export default function FriendsPage() {
 
   return (
     <div
-      className={`retro-page retro-section retro-scene ${
+      className={`retro-page retro-section retro-friends-page retro-scene ${
         swipeDirection === "left"
           ? "retro-scene--swipe-left"
           : swipeDirection === "right"
@@ -496,16 +596,19 @@ export default function FriendsPage() {
       <div className="retro-cloud retro-cloud--2" aria-hidden />
       <div className="retro-cloud retro-cloud--3" aria-hidden />
       <div className="retro-cloud retro-cloud--4" aria-hidden />
+      <div className="retro-cloud retro-cloud--5" aria-hidden />
+      <div className="retro-cloud retro-cloud--6" aria-hidden />
+      <div className="retro-cloud retro-cloud--7" aria-hidden />
+      <div className="retro-cloud retro-cloud--8" aria-hidden />
       <div className="retro-hill" aria-hidden />
 
       <div className="retro-home-hud">
         <p className="retro-brand retro-brand--home">Jim</p>
         <div className="retro-home-hud-actions">
-          {username ? <p className="retro-home-username">{username}</p> : null}
           <button
             type="button"
             className="retro-btn retro-btn--ghost retro-btn--small"
-            onClick={() => navigate("/home", { state: { swipeDirection: backDirection } })}
+            onClick={() => navigate("/home", { state: { homeEntrySide: returnHomeSide } })}
           >
             Back
           </button>
@@ -517,7 +620,6 @@ export default function FriendsPage() {
           <h1 className="retro-title">Friends</h1>
         </div>
 
-        {socialMessage ? <div className="retro-banner retro-workouts-banner">{socialMessage}</div> : null}
         {error ? (
           <div className="retro-banner retro-banner--error" role="alert">
             {error}
@@ -547,6 +649,20 @@ export default function FriendsPage() {
                     ? log.engagement.comments
                     : [];
                   const hasHyped = Boolean(log.engagement?.viewer_has_hyped);
+                  const logUserId = Number(log.user?.user_id);
+                  const logEquippedFromApi = normalizeEquipped(equippedByFriendId[logUserId] || {});
+                  const logEquipped = hasAnyEquipped(logEquippedFromApi)
+                    ? logEquippedFromApi
+                    : parseEquippedFromProfilePic(log.user?.profile_pic);
+                  const hasBodyEquipped = Boolean(logEquipped.body);
+                  const logEquippedLayers = [
+                    logEquipped.body,
+                    logEquipped.eyes,
+                    logEquipped.mouth,
+                    logEquipped.hat
+                  ]
+                    .map((itemId) => EQUIPPED_ITEM_IMAGE_BY_ID[itemId])
+                    .filter(Boolean);
                   return (
                     <article key={log.log_id} className="retro-workout-card">
                       <button
@@ -556,14 +672,45 @@ export default function FriendsPage() {
                           setExpandedLogId((prev) => (prev === log.log_id ? null : log.log_id))
                         }
                       >
-                        <span className="retro-workout-card-title">{log.title || "Workout"}</span>
-                        <span className="retro-workout-date">{formatDate(log.log_date)}</span>
-                        <span className="retro-workout-summary">{summarizeExercises(log.entries)}</span>
-                        <span className="retro-workout-engagement">
-                          By {log.user?.username || "Player"} | Hype:{" "}
-                          {normalizeCount(log.engagement?.hype_count)} | Comments:{" "}
-                          {normalizeCount(log.engagement?.comment_count)}
-                        </span>
+                        <div className="retro-friends-workout-head">
+                          <div className="retro-friends-workout-copy">
+                            <span className="retro-workout-card-title">{log.title || "Workout"}</span>
+                            <span className="retro-workout-date">{formatDate(log.log_date)}</span>
+                            <span className="retro-workout-summary">{summarizeExercises(log.entries)}</span>
+                            <span className="retro-workout-engagement">
+                              By {log.user?.username || "Player"} | Hype:{" "}
+                              {normalizeCount(log.engagement?.hype_count)} | Comments:{" "}
+                              {normalizeCount(log.engagement?.comment_count)}
+                            </span>
+                          </div>
+                          <span className="retro-friends-workout-avatar" aria-hidden>
+                            {!hasBodyEquipped ? (
+                              <SpriteAnimator
+                                src="/sprites/meepo.png"
+                                frameWidth={128}
+                                frameHeight={128}
+                                row={0}
+                                startFrame={0}
+                                endFrame={4}
+                                fps={8}
+                                className="retro-friends-workout-avatar-sprite"
+                              />
+                            ) : null}
+                            {logEquippedLayers.map((imageSrc) => (
+                              <SpriteAnimator
+                                key={`${log.log_id}-${imageSrc}`}
+                                src={imageSrc}
+                                frameWidth={128}
+                                frameHeight={128}
+                                row={0}
+                                startFrame={0}
+                                endFrame={4}
+                                fps={8}
+                                className="retro-friends-workout-avatar-sprite retro-friends-workout-avatar-sprite--overlay"
+                              />
+                            ))}
+                          </span>
+                        </div>
                       </button>
 
                       {isOpen ? (
@@ -675,10 +822,13 @@ export default function FriendsPage() {
               </button>
             </div>
 
-            {activeHubTab === "friends" ? renderFriendsTab() : renderRequestsAndAddTab()}
+            <div className="retro-friends-hub-content">
+              {activeHubTab === "friends" ? renderFriendsTab() : renderRequestsAndAddTab()}
+            </div>
           </aside>
         </div>
       </div>
+
     </div>
   );
 }

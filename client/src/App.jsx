@@ -2,9 +2,12 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./context/AuthContext.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
-import SectionPage from "./pages/SectionPage.jsx";
 import WorkoutsPage from "./pages/WorkoutsPage.jsx";
 import FriendsPage from "./pages/FriendsPage.jsx";
+import ShopPage from "./pages/ShopPage.jsx";
+import ChallengesPage from "./pages/ChallengesPage.jsx";
+import ClosetPage from "./pages/ClosetPage.jsx";
+import CompetitionChallengesPage from "./pages/CompetitionChallengesPage.jsx";
 
 function PrivateRoute({ children }) {
   const { token, authReady } = useAuth();
@@ -67,7 +70,15 @@ export default function App() {
         path="/shop"
         element={
           <PrivateRoute>
-            <SectionPage title="Challenges" />
+            <ChallengesPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/challenges"
+        element={
+          <PrivateRoute>
+            <CompetitionChallengesPage />
           </PrivateRoute>
         }
       />
@@ -83,7 +94,15 @@ export default function App() {
         path="/profile"
         element={
           <PrivateRoute>
-            <SectionPage title="Shop" />
+            <ShopPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/closet"
+        element={
+          <PrivateRoute>
+            <ClosetPage />
           </PrivateRoute>
         }
       />

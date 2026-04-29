@@ -32,7 +32,69 @@ body {
 }
 
 .retro-login {
+  flex-direction: column;
   padding-bottom: 120px;
+}
+
+.retro-login::before,
+.retro-home::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  right: 110px;
+  width: clamp(44px, 6vw, 72px);
+  height: clamp(44px, 6vw, 72px);
+  border: 4px solid #1a1a2e;
+  background: #ffd54a;
+  box-shadow: 4px 4px 0 #1a1a2e;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.retro-login .retro-title {
+  font-size: 22px;
+  line-height: 1.45;
+}
+
+.retro-login .retro-subtitle {
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.retro-login .retro-tab {
+  font-size: 12px;
+}
+
+.retro-login .retro-label {
+  font-size: 11px;
+}
+
+.retro-login .retro-input {
+  font-size: 13px;
+}
+
+.retro-login .retro-btn {
+  font-size: 13px;
+}
+
+.retro-login .retro-banner {
+  font-size: 11px;
+}
+
+.retro-login-logo {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: clamp(44px, 11vw, 88px);
+  line-height: 0.95;
+  letter-spacing: 0.12em;
+  color: #fce300;
+  text-transform: uppercase;
+  text-shadow:
+    4px 4px 0 #8b4513,
+    8px 8px 0 #1a1a2e;
 }
 
 .retro-cloud {
@@ -42,14 +104,19 @@ body {
   box-shadow: 4px 4px 0 #1a1a2e;
   image-rendering: crisp-edges;
   opacity: 0.95;
+  left: -180px;
+  animation-name: retroCloudDrift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 .retro-cloud--1 {
   width: 120px;
   height: 48px;
-  top: 12%;
-  left: 8%;
+  top: 6%;
   border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: 0s;
 }
 
 .retro-cloud--1::before,
@@ -79,9 +146,10 @@ body {
 .retro-cloud--2 {
   width: 96px;
   height: 40px;
-  top: 22%;
-  right: 6%;
+  top: 14%;
   border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: -16s;
 }
 
 .retro-cloud--2::before,
@@ -111,17 +179,102 @@ body {
 .retro-cloud--3 {
   width: 88px;
   height: 36px;
-  top: 31%;
-  left: 14%;
+  top: 22%;
   border-radius: 4px;
-  animation: retroCloudFloat 4.8s ease-in-out infinite;
+  animation-duration: 96s;
+  animation-delay: -32s;
 }
 
 .retro-cloud--4 {
   width: 104px;
   height: 42px;
-  top: 8%;
-  left: 80%;
+  top: 30%;
+  border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: -48s;
+}
+
+.retro-cloud--5 {
+  width: 110px;
+  height: 44px;
+  top: 38%;
+  border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: -64s;
+}
+
+.retro-cloud--6 {
+  width: 92px;
+  height: 38px;
+  top: 46%;
+  border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: -80s;
+}
+
+.retro-cloud--7 {
+  width: 112px;
+  height: 44px;
+  top: 19%;
+  border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: -56s;
+}
+
+.retro-cloud--7::before,
+.retro-cloud--7::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+  border: 4px solid #1a1a2e;
+}
+
+.retro-cloud--7::before {
+  width: 48px;
+  height: 48px;
+  top: -24px;
+  left: 16px;
+  border-radius: 4px;
+}
+
+.retro-cloud--7::after {
+  width: 36px;
+  height: 36px;
+  top: -14px;
+  right: 10px;
+  border-radius: 4px;
+}
+
+.retro-cloud--8 {
+  width: 104px;
+  height: 40px;
+  top: 35%;
+  border-radius: 4px;
+  animation-duration: 96s;
+  animation-delay: -72s;
+}
+
+.retro-cloud--8::before,
+.retro-cloud--8::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+  border: 4px solid #1a1a2e;
+}
+
+.retro-cloud--8::before {
+  width: 42px;
+  height: 42px;
+  top: -20px;
+  left: 12px;
+  border-radius: 4px;
+}
+
+.retro-cloud--8::after {
+  width: 30px;
+  height: 30px;
+  top: -10px;
+  right: 8px;
   border-radius: 4px;
 }
 
@@ -142,6 +295,86 @@ body {
   );
   border-top: 4px solid #1a1a2e;
   box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.15);
+}
+
+.retro-gym-prop {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(26, 26, 46, 0.55));
+}
+
+.retro-gym-prop--login {
+  bottom: 10px;
+}
+
+.retro-gym-prop--login-bench {
+  right: 0;
+  bottom: 16px;
+  width: clamp(120px, 17vw, 230px);
+}
+
+.retro-gym-prop--login-treadmill {
+  left: -1%;
+  bottom: 78px;
+  width: clamp(142px, 19.5vw, 272px);
+}
+
+.retro-gym-prop--login-squat {
+  left: 31%;
+  bottom: -2px;
+  transform: translateX(-50%);
+  width: clamp(92px, 12.8vw, 176px);
+}
+
+.retro-gym-prop--login-dumbbell {
+  left: 64%;
+  bottom: 52px;
+  width: clamp(92px, 12vw, 170px);
+}
+
+.retro-gym-prop--login-jumprope {
+  left: 28%;
+  bottom: 124px;
+  transform: translateX(-100%);
+  width: clamp(64px, 8.6vw, 124px);
+}
+
+.retro-gym-prop--home {
+  bottom: 10px;
+}
+
+.retro-gym-prop--home-bench {
+  right: 0;
+  bottom: 16px;
+  width: clamp(120px, 17vw, 230px);
+}
+
+.retro-gym-prop--home-treadmill {
+  left: -1%;
+  bottom: 78px;
+  width: clamp(142px, 19.5vw, 272px);
+}
+
+.retro-gym-prop--home-squat {
+  left: 31%;
+  bottom: -2px;
+  transform: translateX(-50%);
+  width: clamp(92px, 12.8vw, 176px);
+}
+
+.retro-gym-prop--home-dumbbell {
+  left: 64%;
+  bottom: 52px;
+  width: clamp(92px, 12vw, 170px);
+}
+
+.retro-gym-prop--home-jumprope {
+  left: 46%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  width: clamp(64px, 8.6vw, 124px);
 }
 
 .retro-panel {
@@ -169,7 +402,7 @@ body {
 
 .retro-title {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: 22px;
   line-height: 1.6;
   text-align: center;
   color: #fff;
@@ -330,9 +563,9 @@ body {
 .retro-home-hud {
   position: relative;
   z-index: 2;
-  width: min(960px, 100%);
+  width: min(820px, 100%);
   margin: 0 auto 14px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -344,7 +577,14 @@ body {
 .retro-brand--home {
   margin: 0;
   text-align: left;
-  font-size: 11px;
+  font-size: clamp(34px, 5.4vw, 52px);
+  line-height: 0.86;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fce300;
+  text-shadow:
+    3px 3px 0 #8b4513,
+    6px 6px 0 #1a1a2e;
 }
 
 .retro-home-hud-actions {
@@ -366,11 +606,15 @@ body {
   font-size: 8px;
 }
 
+.retro-home .retro-btn--small {
+  font-size: 12px;
+}
+
 .retro-home-layout {
   position: relative;
   z-index: 2;
   width: min(960px, 100%);
-  margin: 0 auto;
+  margin: -90px auto 0;
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(96px, 180px) 1fr minmax(96px, 180px);
@@ -408,6 +652,79 @@ body {
   letter-spacing: 0.08em;
 }
 
+.retro-home .retro-nav-block {
+  font-size: 14px;
+}
+
+.retro-home-nav-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.retro-home-nav-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d81920;
+  color: #ffffff;
+  border: 2px solid #8d0b10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.retro-home .retro-home-speech {
+  font-size: 10px;
+}
+
+.retro-home-avatar-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.retro-home-speech {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 10px 14px;
+  max-width: none;
+  border: 4px solid #1a1a2e;
+  background: #fffef7;
+  color: #1a1a2e;
+  box-shadow: 6px 6px 0 #1a1a2e;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  white-space: nowrap;
+  text-shadow: none;
+  image-rendering: pixelated;
+  z-index: 3;
+}
+
+.retro-home-speech::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 14px;
+  height: 14px;
+  transform: translateX(-50%) rotate(45deg);
+  background: #fffef7;
+  border-right: 4px solid #1a1a2e;
+  border-bottom: 4px solid #1a1a2e;
+}
+
 .retro-nav-block:hover {
   transform: translate(2px, 2px);
   box-shadow: 4px 4px 0 #1a1a2e;
@@ -424,6 +741,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-top: 0;
   gap: 18px;
   border: 0;
   box-shadow: none;
@@ -444,13 +762,25 @@ body {
   will-change: transform;
 }
 
+.retro-home-avatar-layer {
+  position: relative;
+  width: 128px;
+  height: 128px;
+}
+
 .retro-home-avatar {
   --avatar-scale-x: 1;
+  position: absolute;
+  inset: 0;
   image-rendering: pixelated;
   transform: scaleX(var(--avatar-scale-x)) scale(1.5);
   transform-origin: center;
   backface-visibility: hidden;
   will-change: transform, background-position;
+}
+
+.retro-home-avatar--overlay {
+  pointer-events: none;
 }
 
 .retro-home-avatar--mirrored {
@@ -463,7 +793,7 @@ body {
 }
 
 .retro-home-avatar--idle {
-  animation: retroAvatarBob 880ms ease-in-out infinite;
+  animation: none;
 }
 
 .retro-home-avatar--introRun,
@@ -517,6 +847,11 @@ body {
   gap: 14px;
 }
 
+.retro-workouts-page .retro-workouts-shell {
+  max-height: calc(100dvh - 190px);
+  overflow: hidden;
+}
+
 .retro-workouts-header {
   display: flex;
   gap: 12px;
@@ -539,6 +874,19 @@ body {
 .retro-workout-form-panel {
   width: 100%;
   max-width: none;
+}
+
+.retro-workout-form-panel,
+.retro-workout-edit-panel {
+  max-height: calc(100dvh - 250px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.retro-workout-form-panel--fullscreen {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
 }
 
 .retro-workout-subtitle {
@@ -575,6 +923,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.retro-workouts-page .retro-workout-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .retro-workout-card {
@@ -760,6 +1115,107 @@ body {
   margin-bottom: 4px;
 }
 
+.retro-workouts-page .retro-home-hud .retro-btn--small,
+.retro-goals-page .retro-home-hud .retro-btn--small {
+  font-size: 12px;
+}
+
+.retro-workouts-page .retro-workouts-header .retro-title,
+.retro-goals-page .retro-challenges-shell .retro-title {
+  font-size: 24px;
+}
+
+.retro-workouts-page .retro-workouts-header .retro-btn--small {
+  font-size: 12px;
+}
+
+.retro-workouts-page .retro-workouts-banner,
+.retro-workouts-page .retro-banner,
+.retro-goals-page .retro-challenges-flash,
+.retro-goals-page .retro-banner {
+  font-size: 11px;
+}
+
+.retro-workouts-page .retro-workout-toggle {
+  font-size: 11px;
+  gap: 10px;
+}
+
+.retro-workouts-page .retro-workout-card-title {
+  font-size: 13px;
+}
+
+.retro-workouts-page .retro-workout-date,
+.retro-workouts-page .retro-workout-summary,
+.retro-workouts-page .retro-workout-engagement {
+  font-size: 10px;
+}
+
+.retro-workouts-page .retro-workout-copy,
+.retro-workouts-page .retro-workout-entry-meta,
+.retro-workouts-page .retro-workout-entry-notes,
+.retro-workouts-page .retro-workout-comment-user,
+.retro-workouts-page .retro-workout-comment-text {
+  font-size: 10px;
+}
+
+.retro-workouts-page .retro-workout-entry-name {
+  font-size: 11px;
+}
+
+.retro-workouts-page .retro-label,
+.retro-workouts-page .retro-hint {
+  font-size: 10px;
+}
+
+.retro-workouts-page .retro-input,
+.retro-workouts-page .retro-select-trigger {
+  font-size: 12px;
+}
+
+.retro-workouts-page .retro-select-option {
+  font-size: 11px;
+}
+
+.retro-workouts-page .retro-btn--small {
+  font-size: 11px;
+}
+
+.retro-goals-page .retro-challenges-filter .retro-tab {
+  font-size: 11px;
+  padding: 14px 10px;
+}
+
+.retro-goals-page .retro-challenges-loading {
+  font-size: 11px;
+}
+
+.retro-goals-page .retro-challenge-title {
+  font-size: 12px;
+}
+
+.retro-goals-page .retro-challenge-desc {
+  font-size: 10px;
+}
+
+.retro-goals-page .retro-challenge-badge {
+  font-size: 8px;
+  padding: 4px 8px;
+}
+
+.retro-goals-page .retro-challenge-reward {
+  font-size: 11px;
+}
+
+.retro-goals-page .retro-challenge-progress-label {
+  font-size: 10px;
+}
+
+.retro-goals-page .retro-challenge-claim-btn,
+.retro-goals-page .retro-challenge-claimed-badge {
+  font-size: 10px;
+}
+
 .retro-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -795,29 +1251,92 @@ body {
 
 .retro-friends-shell {
   width: min(960px, 100%);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .retro-friends-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 34vw, 380px);
   gap: 14px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .retro-friends-feed {
   min-width: 0;
+  min-height: 0;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.retro-friends-feed .retro-workout-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .retro-friends-feed .retro-empty-field {
   width: 100%;
 }
 
+.retro-friends-workout-head {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 84px;
+}
+
+.retro-friends-workout-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 8px;
+}
+
+.retro-friends-workout-avatar {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  flex: 0 0 112px;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  margin-top: -18px;
+}
+
+.retro-friends-workout-avatar-sprite {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  image-rendering: pixelated;
+  transform: translate(-50%, -50%) scale(1.04);
+  transform-origin: center;
+}
+
 .retro-friends-hub {
   width: 100%;
   max-width: none;
+  min-width: 0;
   padding: 18px;
-  display: grid;
+  height: 500px;
+  max-height: 500px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+}
+
+.retro-friends-hub-content {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
 }
 
 .retro-friends-tab-toggle {
@@ -888,6 +1407,103 @@ body {
   background: #1f3b73;
 }
 
+.retro-friends-grass-avatars {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 100%);
+  margin: 8px auto 0;
+  min-height: 180px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 18px;
+  padding: 0 8px 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+}
+
+.retro-friends-grass-avatar {
+  flex: 0 0 172px;
+  width: 172px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.retro-friends-grass-avatar-wrap {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  transform-origin: bottom center;
+  will-change: transform;
+}
+
+.retro-friends-grass-avatar-sprite {
+  position: absolute;
+  inset: 0;
+  image-rendering: pixelated;
+  transform: scale(1.28);
+  transform-origin: bottom left;
+}
+
+.retro-friends-grass-avatar-sprite--right {
+  transform: scaleX(-1) scale(1.28);
+}
+
+.retro-friends-grass-avatar-name {
+  margin: 0;
+  font-size: 11px;
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #1a1a2e;
+}
+
+.retro-friends-page .retro-home-hud .retro-btn--small {
+  font-size: 12px;
+}
+
+.retro-friends-page {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  padding-bottom: 16px;
+}
+
+.retro-friends-page .retro-title {
+  font-size: 24px;
+}
+
+.retro-friends-page .retro-workout-subtitle {
+  font-size: 18px;
+}
+
+.retro-friends-page .retro-banner,
+.retro-friends-page .retro-label,
+.retro-friends-page .retro-hint,
+.retro-friends-page .retro-workout-date,
+.retro-friends-page .retro-workout-summary,
+.retro-friends-page .retro-workout-engagement,
+.retro-friends-page .retro-workout-entry-meta,
+.retro-friends-page .retro-workout-entry-notes,
+.retro-friends-page .retro-workout-comment-user,
+.retro-friends-page .retro-workout-comment-text {
+  font-size: 11px;
+}
+
+.retro-friends-page .retro-workout-card-title,
+.retro-friends-page .retro-workout-entry-name,
+.retro-friends-page .retro-friends-hub-name {
+  font-size: 13px;
+}
+
+.retro-friends-page .retro-tab,
+.retro-friends-page .retro-input,
+.retro-friends-page .retro-btn--small {
+  font-size: 12px;
+}
+
 .retro-scene {
   isolation: isolate;
 }
@@ -945,6 +1561,15 @@ body {
   }
   100% {
     transform: translate(0, 0);
+  }
+}
+
+@keyframes retroCloudDrift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(100vw + 360px));
   }
 }
 
@@ -1066,7 +1691,7 @@ body {
   }
 
   .retro-home-avatar--idle {
-    animation: retroAvatarBobMobile 880ms ease-in-out infinite;
+    animation: none;
   }
 
   .retro-nav-block {
@@ -1075,6 +1700,12 @@ body {
 
   .retro-friends-layout {
     grid-template-columns: 1fr;
+  }
+
+  .retro-friends-grass-avatars {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 8px;
   }
 }
 
@@ -1087,5 +1718,657 @@ body {
   }
   100% {
     transform: translateY(0) scaleX(var(--avatar-scale-x)) scale(1.25);
+  }
+}
+
+/* ── Coins badge ── */
+.retro-coins-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 10px;
+  color: #ffffff;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-shadow: none;
+}
+
+.retro-home .retro-coins-badge {
+  font-size: 12px;
+  gap: 2px;
+  margin-right: 10px;
+}
+
+.retro-home .retro-coins-count {
+  letter-spacing: 0.02em;
+}
+
+.retro-home .retro-coin-inline--hud {
+  width: 30px;
+  height: 30px;
+}
+
+.retro-home-goals-box {
+  position: relative;
+  z-index: 2;
+  width: min(820px, 100%);
+  margin: 0 auto 14px;
+  border: 4px solid #1a1a2e;
+  box-shadow: 6px 6px 0 #1a1a2e;
+  background: rgba(15, 27, 53, 0.92);
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.retro-home-goals-title {
+  margin: 0;
+  font-size: 12px;
+  color: #fce300;
+  text-shadow: 2px 2px 0 #8b4513;
+}
+
+.retro-home-goals-list {
+  display: grid;
+  gap: 8px;
+  max-height: 124px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.retro-home-goal-item {
+  border: 3px solid #1a1a2e;
+  background: #27467f;
+  padding: 10px;
+  min-height: 104px;
+}
+
+.retro-home-goal-name {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: #ffffff;
+}
+
+.retro-home-goal-desc {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: #dbe7ff;
+  line-height: 1.4;
+}
+
+.retro-coin-inline {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  vertical-align: -2px;
+}
+
+.retro-coin-inline--hud {
+  width: 22px;
+  height: 22px;
+}
+
+.retro-coin-inline--price {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── 5th nav button: Shop ── */
+.retro-nav-shop {
+  font-family: inherit;
+  font-size: 11px;
+  color: #1a1a2e;
+  background: linear-gradient(135deg, #fce300 0%, #ffaa00 50%, #fce300 100%);
+  background-size: 200% 200%;
+  border: 4px solid #1a1a2e;
+  box-shadow: 6px 6px 0 rgba(26, 26, 46, 0.35), 0 0 0 2px #ffaa00;
+  padding: 14px 36px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  animation: retroShopShimmer 2.4s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  margin-top: -64px;
+}
+
+.retro-nav-shop:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 rgba(26, 26, 46, 0.35), 0 0 0 2px #ffaa00;
+}
+
+.retro-nav-shop:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+@keyframes retroShopShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Shop page ── */
+.retro-shop-shell {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.retro-shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.retro-shop-title {
+  margin: 0;
+  color: #fce300;
+  text-shadow: 3px 3px 0 #8b4513;
+  font-size: 24px;
+}
+
+.retro-shop-tabs {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.retro-shop-tabs .retro-tab {
+  font-size: 11px;
+  padding: 14px 10px;
+}
+
+.retro-shop-flash {
+  background: #1a1a2e;
+  color: #6abf47;
+  text-shadow: none;
+}
+
+.retro-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 14px;
+}
+
+.retro-shop-card {
+  border: 4px solid #1a1a2e;
+  box-shadow: 5px 5px 0 #1a1a2e;
+  background: #1f3b73;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 10px;
+}
+
+.retro-shop-card--owned {
+  background: #27467f;
+  opacity: 0.8;
+}
+
+.retro-shop-card-img-wrap {
+  width: 90px;
+  height: 90px;
+  overflow: hidden;
+  border: 3px solid #1a1a2e;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.retro-shop-card-sprite {
+  transform: scale(0.7);
+  transform-origin: top left;
+  image-rendering: pixelated;
+}
+
+.retro-shop-card-name {
+  margin: 0;
+  font-size: 13px;
+  text-align: center;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.retro-shop-card-price {
+  margin: 0;
+  font-size: 16px;
+  color: #fce300;
+  text-shadow: 2px 2px 0 #8b4513;
+}
+
+.retro-shop-owned-badge {
+  font-size: 9px;
+  color: #6abf47;
+  text-shadow: 1px 1px 0 #1a1a2e;
+  letter-spacing: 0.06em;
+}
+
+.retro-shop-buy-btn {
+  width: 100%;
+  font-size: 11px;
+  padding: 12px 10px;
+}
+
+.retro-shop-shell .retro-coin-inline--price {
+  width: 24px;
+  height: 24px;
+  vertical-align: -5px;
+}
+
+.retro-closet-page .retro-home-hud {
+  margin-bottom: 16px;
+}
+
+.retro-closet-shell {
+  position: relative;
+  z-index: 2;
+  width: min(980px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.retro-closet-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+}
+
+.retro-closet-header .retro-title {
+  margin: 0;
+  font-size: 28px;
+}
+
+.retro-closet-avatar-stage {
+  min-height: 430px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 34px;
+  padding-left: 0;
+}
+
+.retro-closet-avatar-wrap {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  transition: transform 850ms linear;
+}
+
+.retro-closet-avatar-layer {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  transform: scale(2.6);
+  transform-origin: top left;
+}
+
+.retro-closet-avatar-wrap--idle {
+  animation: none;
+}
+
+.retro-closet-avatar-base,
+.retro-closet-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  image-rendering: pixelated;
+}
+
+.retro-closet-items-panel {
+  border: 4px solid #1a1a2e;
+  box-shadow: 6px 6px 0 #1a1a2e;
+  background: rgba(15, 27, 53, 0.92);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 430px;
+}
+
+.retro-closet-tabs {
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0;
+}
+
+.retro-closet-tabs .retro-tab {
+  font-size: 13px;
+  padding: 14px 10px;
+}
+
+.retro-closet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.retro-closet-page .retro-banner {
+  font-size: 12px;
+}
+
+.retro-closet-page .retro-shop-card-name {
+  font-size: 13px;
+}
+
+.retro-closet-page .retro-btn--small {
+  font-size: 12px;
+}
+
+@keyframes retroClosetAvatarBounce {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 780px) {
+  .retro-closet-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .retro-closet-avatar-stage,
+  .retro-closet-items-panel {
+    min-height: unset;
+  }
+
+  .retro-closet-avatar-stage {
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding-left: 0;
+  }
+
+  .retro-closet-avatar-wrap--runin .retro-closet-avatar-base,
+  .retro-closet-avatar-wrap--idle .retro-closet-avatar-base {
+    transform: none;
+  }
+
+  .retro-closet-avatar-layer {
+    transform: scale(2.1);
+  }
+
+  .retro-closet-grid {
+    grid-template-columns: 1fr;
+    max-height: 320px;
+  }
+
+  .retro-closet-tabs .retro-tab {
+    font-size: 12px;
+  }
+
+  .retro-shop-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .retro-shop-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .retro-shop-card-img-wrap {
+    width: 78px;
+    height: 78px;
+  }
+
+  .retro-shop-card-sprite {
+    transform: scale(0.6);
+  }
+}
+
+/* ── Challenges page background ── */
+.retro-challenges {
+  background-color: #0d0a1a;
+  background-image:
+    radial-gradient(ellipse 60% 30% at 20% 60%, rgba(180, 0, 255, 0.13) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 25% at 75% 40%, rgba(0, 220, 180, 0.11) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 20% at 50% 80%, rgba(255, 60, 180, 0.10) 0%, transparent 70%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 30px,
+      rgba(120, 0, 200, 0.06) 30px,
+      rgba(120, 0, 200, 0.06) 32px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 30px,
+      rgba(120, 0, 200, 0.06) 30px,
+      rgba(120, 0, 200, 0.06) 32px
+    );
+}
+
+.retro-challenges::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(2px 2px at 8%  12%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 23% 28%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at 41%  7%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 57% 19%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at 72%  5%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 88% 23%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at 14% 42%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 33% 55%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at 62% 47%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 79% 38%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at  5% 68%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 47% 72%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at 91% 61%, #ff40ff 0%, transparent 100%),
+    radial-gradient(2px 2px at 27% 85%, #40ffcc 0%, transparent 100%),
+    radial-gradient(2px 2px at 68% 90%, #ff40ff 0%, transparent 100%);
+  opacity: 0.7;
+}
+
+.retro-challenges-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #1a0a2e 0px,
+      #1a0a2e 30px,
+      #120820 30px,
+      #120820 34px
+    );
+  border-top: 4px solid #b400ff;
+  box-shadow:
+    inset 0 4px 0 rgba(180, 0, 255, 0.25),
+    0 -8px 24px rgba(180, 0, 255, 0.2);
+}
+
+/* ── Challenges page shell ── */
+.retro-challenges-shell {
+  position: relative;
+  z-index: 2;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.retro-challengehub-shell {
+  width: min(920px, 100%);
+}
+
+.retro-challengehub-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.retro-challengehub-board {
+  border: 2px solid #1a1a2e;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.retro-goals-page .retro-challenges-shell {
+  max-height: calc(100dvh - 190px);
+  overflow: hidden;
+}
+
+.retro-challenges-filter {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.retro-challenges-flash {
+  background: #1a1a2e;
+  color: #6abf47;
+  text-shadow: none;
+}
+
+.retro-challenges-loading {
+  font-size: 8px;
+  color: #fce300;
+  text-align: center;
+  padding: 24px;
+}
+
+.retro-challenges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-goals-page .retro-challenges-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.retro-challenge-card {
+  border: 4px solid #1a1a2e;
+  box-shadow: 5px 5px 0 #1a1a2e;
+  background: #1f3b73;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-challenge-card--medium { background: #2d1f73; }
+.retro-challenge-card--hard   { background: #731f1f; }
+.retro-challenge-card--claimed { opacity: 0.55; }
+
+.retro-challenge-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.retro-challenge-title {
+  margin: 0 0 4px;
+  font-size: 9px;
+  color: #fce300;
+  text-shadow: 2px 2px 0 #8b4513;
+}
+
+.retro-challenge-desc {
+  margin: 0;
+  font-size: 7px;
+  color: #fff;
+  line-height: 1.8;
+}
+
+.retro-challenge-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.retro-challenge-badge {
+  font-size: 6px;
+  padding: 3px 6px;
+  border: 2px solid #1a1a2e;
+  letter-spacing: 0.08em;
+  text-shadow: none;
+}
+
+.retro-challenge-badge--easy   { background: #6abf47; color: #1a1a2e; }
+.retro-challenge-badge--medium { background: #5c94fc; color: #fff; }
+.retro-challenge-badge--hard   { background: #c84c0c; color: #fff; }
+
+.retro-challenge-reward {
+  font-size: 8px;
+  color: #fce300;
+  text-shadow: 2px 2px 0 #8b4513;
+}
+
+.retro-challenge-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.retro-challenge-progress-bar {
+  flex: 1;
+  height: 10px;
+  border: 2px solid #1a1a2e;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.retro-challenge-progress-fill {
+  height: 100%;
+  background: #6abf47;
+  transition: width 0.3s ease;
+}
+
+.retro-challenge-progress-label {
+  font-size: 7px;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.retro-challenge-claim-btn {
+  align-self: flex-start;
+}
+
+.retro-challenge-claimed-badge {
+  font-size: 7px;
+  color: #6abf47;
+  letter-spacing: 0.08em;
+  align-self: flex-start;
+}
+
+@media (max-width: 780px) {
+  .retro-challenges-filter {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .retro-challengehub-grid {
+    grid-template-columns: 1fr;
   }
 }

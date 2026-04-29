@@ -122,10 +122,9 @@ function RetroSelect({ value, options, placeholder, onChange, disabled = false }
       <button
         type="button"
         className="retro-select-trigger"
-        onClick={() => {
-          if (!disabled) {
-            setOpen((prev) => !prev);
-          }
+        onMouseDown={(ev) => {
+          ev.preventDefault();
+          if (!disabled) setOpen((prev) => !prev);
         }}
         disabled={disabled}
       >
@@ -143,7 +142,8 @@ function RetroSelect({ value, options, placeholder, onChange, disabled = false }
               className={`retro-select-option ${
                 String(option.value) === String(value) ? "retro-select-option--active" : ""
               }`}
-              onClick={() => {
+              onMouseDown={(ev) => {
+                ev.preventDefault();
                 onChange(option.value);
                 setOpen(false);
               }}
@@ -159,11 +159,13 @@ function RetroSelect({ value, options, placeholder, onChange, disabled = false }
 }
 
 export default function WorkoutsPage() {
-  const { token, username } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const swipeDirection = location.state?.swipeDirection;
-  const backDirection = swipeDirection === "left" ? "right" : "left";
+  const returnHomeSide =
+    location.state?.homeEntrySide ||
+    (swipeDirection === "left" ? "right" : swipeDirection === "right" ? "left" : "left");
 
   const [workouts, setWorkouts] = useState([]);
   const [exercises, setExercises] = useState([]);
@@ -177,7 +179,6 @@ export default function WorkoutsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formState, setFormState] = useState(createInitialFormState);
   const [formError, setFormError] = useState("");
-  const [formSuccess, setFormSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingLogId, setEditingLogId] = useState(null);
   const [editFormState, setEditFormState] = useState(null);
@@ -377,7 +378,6 @@ export default function WorkoutsPage() {
   function resetForm() {
     setFormState(createInitialFormState());
     setFormError("");
-    setFormSuccess("");
   }
 
   function buildFormFromWorkout(log) {
@@ -462,7 +462,6 @@ export default function WorkoutsPage() {
   async function handleCreateWorkout(ev) {
     ev.preventDefault();
     setFormError("");
-    setFormSuccess("");
 
     const payload = buildPayloadFromForm(formState, setFormError);
     if (!payload) {
@@ -475,7 +474,6 @@ export default function WorkoutsPage() {
       await refreshWorkouts();
       setShowCreateForm(false);
       resetForm();
-      setFormSuccess("Workout added to your log.");
     } catch (err) {
       setFormError(err.message || "Failed to create workout.");
     } finally {
@@ -512,7 +510,6 @@ export default function WorkoutsPage() {
       await apiUpdateWorkout(token, editingLogId, payload);
       await refreshWorkouts();
       stopEditingWorkout();
-      setFormSuccess("Workout updated.");
     } catch (err) {
       setEditError(err.message || "Failed to update workout.");
     } finally {
@@ -535,7 +532,6 @@ export default function WorkoutsPage() {
     const logId = deleteConfirmLog.log_id;
     setDeletingLogId(logId);
     setError("");
-    setFormSuccess("");
     try {
       await apiDeleteWorkout(token, logId);
       if (expandedLogId === logId) {
@@ -545,7 +541,6 @@ export default function WorkoutsPage() {
         stopEditingWorkout();
       }
       await refreshWorkouts();
-      setFormSuccess("Workout deleted.");
     } catch (err) {
       setError(err.message || "Failed to delete workout.");
     } finally {
@@ -755,7 +750,7 @@ export default function WorkoutsPage() {
 
   return (
     <div
-      className={`retro-page retro-section retro-scene ${
+      className={`retro-page retro-section retro-workouts-page retro-scene ${
         swipeDirection === "left"
           ? "retro-scene--swipe-left"
           : swipeDirection === "right"
@@ -767,16 +762,19 @@ export default function WorkoutsPage() {
       <div className="retro-cloud retro-cloud--2" aria-hidden />
       <div className="retro-cloud retro-cloud--3" aria-hidden />
       <div className="retro-cloud retro-cloud--4" aria-hidden />
+      <div className="retro-cloud retro-cloud--5" aria-hidden />
+      <div className="retro-cloud retro-cloud--6" aria-hidden />
+      <div className="retro-cloud retro-cloud--7" aria-hidden />
+      <div className="retro-cloud retro-cloud--8" aria-hidden />
       <div className="retro-hill" aria-hidden />
 
       <div className="retro-home-hud">
         <p className="retro-brand retro-brand--home">Jim</p>
         <div className="retro-home-hud-actions">
-          {username ? <p className="retro-home-username">{username}</p> : null}
           <button
             type="button"
             className="retro-btn retro-btn--ghost retro-btn--small"
-            onClick={() => navigate("/home", { state: { swipeDirection: backDirection } })}
+            onClick={() => navigate("/home", { state: { homeEntrySide: returnHomeSide } })}
           >
             Back
           </button>
@@ -803,7 +801,6 @@ export default function WorkoutsPage() {
           </button>
         </div>
 
-        {formSuccess ? <div className="retro-banner retro-workouts-banner">{formSuccess}</div> : null}
         {error ? (
           <div className="retro-banner retro-banner--error" role="alert">
             {error}
@@ -811,7 +808,7 @@ export default function WorkoutsPage() {
         ) : null}
 
         {showCreateForm ? (
-          <div className="retro-panel retro-panel--wide retro-workout-form-panel">
+          <div className="retro-panel retro-panel--wide retro-workout-form-panel retro-workout-form-panel--fullscreen">
             <h2 className="retro-title retro-workout-subtitle">Add Workout</h2>
             {renderWorkoutForm({
               state: formState,
@@ -824,135 +821,137 @@ export default function WorkoutsPage() {
           </div>
         ) : null}
 
-        <div className="retro-workout-list">
-          {loading ? (
-            <div className="retro-empty-field retro-workout-empty">
-              <p>Loading workouts...</p>
-            </div>
-          ) : workouts.length === 0 ? (
-            <div className="retro-empty-field retro-workout-empty">
-              <p>No workouts logged yet.</p>
-            </div>
-          ) : (
-            workouts.map((log) => {
-              const isOpen = expandedLogId === log.log_id;
-              const isPrivate = Number(log.is_private) === 1;
-              const comments = commentsByLogId[log.log_id] || [];
-              return (
-                <article key={log.log_id} className="retro-workout-card">
-                  <button
-                    type="button"
-                    className="retro-workout-toggle"
-                    onClick={() => handleToggleWorkout(log)}
-                  >
-                    <span className="retro-workout-card-title">{log.title}</span>
-                    <span className="retro-workout-date">{formatDate(log.log_date)}</span>
-                    <span className="retro-workout-summary">{summarizeExercises(log.entries)}</span>
-                    {!isPrivate ? (
-                      <span className="retro-workout-engagement">
-                        Hype: {normalizeCount(log.hype_count)} | Comments:{" "}
-                        {normalizeCount(log.comment_count)}
-                      </span>
-                    ) : null}
-                  </button>
+        {!showCreateForm ? (
+          <div className="retro-workout-list">
+            {loading ? (
+              <div className="retro-empty-field retro-workout-empty">
+                <p>Loading workouts...</p>
+              </div>
+            ) : workouts.length === 0 ? (
+              <div className="retro-empty-field retro-workout-empty">
+                <p>No workouts logged yet.</p>
+              </div>
+            ) : (
+              workouts.map((log) => {
+                const isOpen = expandedLogId === log.log_id;
+                const isPrivate = Number(log.is_private) === 1;
+                const comments = commentsByLogId[log.log_id] || [];
+                return (
+                  <article key={log.log_id} className="retro-workout-card">
+                    <button
+                      type="button"
+                      className="retro-workout-toggle"
+                      onClick={() => handleToggleWorkout(log)}
+                    >
+                      <span className="retro-workout-card-title">{log.title}</span>
+                      <span className="retro-workout-date">{formatDate(log.log_date)}</span>
+                      <span className="retro-workout-summary">{summarizeExercises(log.entries)}</span>
+                      {!isPrivate ? (
+                        <span className="retro-workout-engagement">
+                          Hype: {normalizeCount(log.hype_count)} | Comments:{" "}
+                          {normalizeCount(log.comment_count)}
+                        </span>
+                      ) : null}
+                    </button>
 
-                  {isOpen ? (
-                    <div className="retro-workout-detail">
-                      {editingLogId === log.log_id && editFormState ? (
-                        <div className="retro-panel retro-panel--wide retro-workout-edit-panel">
-                          <h2 className="retro-title retro-workout-subtitle">Edit Workout</h2>
-                          {renderWorkoutForm({
-                            state: editFormState,
-                            setState: setEditFormState,
-                            onSubmit: handleUpdateWorkout,
-                            errorMessage: editError,
-                            isSaving: isEditSubmitting,
-                            submitLabel: "Save Changes",
-                            onCancel: stopEditingWorkout
-                          })}
-                        </div>
-                      ) : (
-                        <>
-                          <div className="retro-actions">
-                            <button
-                              type="button"
-                              className="retro-btn retro-btn--ghost retro-btn--small"
-                              onClick={() => startEditingWorkout(log)}
-                              disabled={deletingLogId === log.log_id}
-                            >
-                              Edit Workout
-                            </button>
-                            <button
-                              type="button"
-                              className="retro-btn retro-btn--danger retro-btn--small"
-                              onClick={() => requestDeleteWorkout(log)}
-                              disabled={deletingLogId === log.log_id}
-                            >
-                              {deletingLogId === log.log_id ? "Deleting..." : "Delete Workout"}
-                            </button>
-                          </div>
-                          {log.description ? (
-                            <p className="retro-workout-copy">{log.description}</p>
-                          ) : null}
-                          {log.notes ? <p className="retro-workout-copy">{log.notes}</p> : null}
-
-                          <div className="retro-workout-entry-list">
-                            {log.entries?.map((entry) => {
-                              const byName = exerciseByName.get(
-                                String(entry.exercise_name || "").toLowerCase()
-                              );
-                              const isCardio =
-                                String(byName?.category?.name || "").toLowerCase() === "cardio";
-                              const cardioUnit = getCardioUnitByExerciseName(entry.exercise_name);
-                              return (
-                                <div key={entry.entry_id} className="retro-workout-entry-item">
-                                  <p className="retro-workout-entry-name">{entry.exercise_name}</p>
-                                  <p className="retro-workout-entry-meta">
-                                    {entry.value != null
-                                      ? `Value: ${entry.value}${isCardio ? ` ${cardioUnit}` : ""}`
-                                      : "Value: -"}{" "}
-                                    | Sets: {entry.sets ?? "-"}
-                                  </p>
-                                  {entry.notes ? (
-                                    <p className="retro-workout-entry-notes">{entry.notes}</p>
-                                  ) : null}
-                                </div>
-                              );
+                    {isOpen ? (
+                      <div className="retro-workout-detail">
+                        {editingLogId === log.log_id && editFormState ? (
+                          <div className="retro-panel retro-panel--wide retro-workout-edit-panel">
+                            <h2 className="retro-title retro-workout-subtitle">Edit Workout</h2>
+                            {renderWorkoutForm({
+                              state: editFormState,
+                              setState: setEditFormState,
+                              onSubmit: handleUpdateWorkout,
+                              errorMessage: editError,
+                              isSaving: isEditSubmitting,
+                              submitLabel: "Save Changes",
+                              onCancel: stopEditingWorkout
                             })}
                           </div>
-                        </>
-                      )}
-
-                      {!isPrivate ? (
-                        <div className="retro-workout-comments">
-                          <p className="retro-label">Comments</p>
-                          {commentLoadingByLogId[log.log_id] ? (
-                            <p className="retro-hint">Loading comments...</p>
-                          ) : commentErrorByLogId[log.log_id] ? (
-                            <div className="retro-banner retro-banner--error">
-                              {commentErrorByLogId[log.log_id]}
+                        ) : (
+                          <>
+                            <div className="retro-actions">
+                              <button
+                                type="button"
+                                className="retro-btn retro-btn--ghost retro-btn--small"
+                                onClick={() => startEditingWorkout(log)}
+                                disabled={deletingLogId === log.log_id}
+                              >
+                                Edit Workout
+                              </button>
+                              <button
+                                type="button"
+                                className="retro-btn retro-btn--danger retro-btn--small"
+                                onClick={() => requestDeleteWorkout(log)}
+                                disabled={deletingLogId === log.log_id}
+                              >
+                                {deletingLogId === log.log_id ? "Deleting..." : "Delete Workout"}
+                              </button>
                             </div>
-                          ) : comments.length === 0 ? (
-                            <p className="retro-hint">No comments yet.</p>
-                          ) : (
-                            comments.map((comment) => (
-                              <div key={comment.comment_id} className="retro-workout-comment-item">
-                                <p className="retro-workout-comment-user">
-                                  {comment.user?.username || "Player"}
-                                </p>
-                                <p className="retro-workout-comment-text">{comment.comment}</p>
+                            {log.description ? (
+                              <p className="retro-workout-copy">{log.description}</p>
+                            ) : null}
+                            {log.notes ? <p className="retro-workout-copy">{log.notes}</p> : null}
+
+                            <div className="retro-workout-entry-list">
+                              {log.entries?.map((entry) => {
+                                const byName = exerciseByName.get(
+                                  String(entry.exercise_name || "").toLowerCase()
+                                );
+                                const isCardio =
+                                  String(byName?.category?.name || "").toLowerCase() === "cardio";
+                                const cardioUnit = getCardioUnitByExerciseName(entry.exercise_name);
+                                return (
+                                  <div key={entry.entry_id} className="retro-workout-entry-item">
+                                    <p className="retro-workout-entry-name">{entry.exercise_name}</p>
+                                    <p className="retro-workout-entry-meta">
+                                      {entry.value != null
+                                        ? `Value: ${entry.value}${isCardio ? ` ${cardioUnit}` : ""}`
+                                        : "Value: -"}{" "}
+                                      | Sets: {entry.sets ?? "-"}
+                                    </p>
+                                    {entry.notes ? (
+                                      <p className="retro-workout-entry-notes">{entry.notes}</p>
+                                    ) : null}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+
+                        {!isPrivate ? (
+                          <div className="retro-workout-comments">
+                            <p className="retro-label">Comments</p>
+                            {commentLoadingByLogId[log.log_id] ? (
+                              <p className="retro-hint">Loading comments...</p>
+                            ) : commentErrorByLogId[log.log_id] ? (
+                              <div className="retro-banner retro-banner--error">
+                                {commentErrorByLogId[log.log_id]}
                               </div>
-                            ))
-                          )}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </article>
-              );
-            })
-          )}
-        </div>
+                            ) : comments.length === 0 ? (
+                              <p className="retro-hint">No comments yet.</p>
+                            ) : (
+                              comments.map((comment) => (
+                                <div key={comment.comment_id} className="retro-workout-comment-item">
+                                  <p className="retro-workout-comment-user">
+                                    {comment.user?.username || "Player"}
+                                  </p>
+                                  <p className="retro-workout-comment-text">{comment.comment}</p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })
+            )}
+          </div>
+        ) : null}
       </div>
 
       {deleteConfirmLog ? (

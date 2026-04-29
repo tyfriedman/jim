@@ -124,7 +124,7 @@ router.post("/", async (req, res, next) => {
         );
 
         await connection.commit();
-        return { logId, xpGain, coinGain };
+        return { logId, xpGain };
       } catch (error) {
         await connection.rollback();
         throw error;
@@ -133,7 +133,7 @@ router.post("/", async (req, res, next) => {
 
     return res
       .status(201)
-      .json({ log_id: created.logId, xp_awarded: created.xpGain, coins_awarded: created.coinGain });
+      .json({ log_id: created.logId, xp_awarded: created.xpGain });
   } catch (error) {
     return next(error);
   }

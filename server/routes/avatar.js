@@ -4,6 +4,33 @@ const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 router.use(requireAuth);
+const EQUIPPED_PROFILE_PREFIX = "jim-equipped:";
+
+function normalizeEquipped(raw) {
+  return {
+    body: typeof raw?.body === "string" ? raw.body : null,
+    eyes: typeof raw?.eyes === "string" ? raw.eyes : null,
+    mouth: typeof raw?.mouth === "string" ? raw.mouth : null,
+    hat: typeof raw?.hat === "string" ? raw.hat : null
+  };
+}
+
+function serializeEquipped(equipped) {
+  return `${EQUIPPED_PROFILE_PREFIX}${JSON.stringify(normalizeEquipped(equipped))}`;
+}
+
+function parseEquipped(profilePic) {
+  const value = String(profilePic || "");
+  if (!value.startsWith(EQUIPPED_PROFILE_PREFIX)) {
+    return normalizeEquipped({});
+  }
+  try {
+    const payload = JSON.parse(value.slice(EQUIPPED_PROFILE_PREFIX.length));
+    return normalizeEquipped(payload);
+  } catch {
+    return normalizeEquipped({});
+  }
+}
 
 async function getAvatarWithItems(userId) {
   const avatarRes = await withConnection((connection) =>
@@ -120,6 +147,49 @@ router.post("/equip", async (req, res, next) => {
   }
 });
 
+router.post("/buy", async (req, res, next) => {
+  const price = Number(req.body.price);
+  if (!Number.isFinite(price) || price < 0) {
+    return res.status(400).json({ error: "Invalid price." });
+  }
+
+  try {
+    const newCoins = await withConnection(async (connection) => {
+      try {
+        const coinRes = await connection.execute(
+          "SELECT coins FROM USERS WHERE user_id = :userId",
+          { userId: req.user.userId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        const user = coinRes.rows[0];
+        if (!user) {
+          throw Object.assign(new Error("User not found."), { statusCode: 404 });
+        }
+        const current = Number(user.COINS) || 0;
+        if (current < price) {
+          throw Object.assign(new Error("Not enough coins."), { statusCode: 402 });
+        }
+        const updated = current - price;
+        await connection.execute(
+          "UPDATE USERS SET coins = :coins WHERE user_id = :userId",
+          { coins: updated, userId: req.user.userId }
+        );
+        await connection.commit();
+        return updated;
+      } catch (err) {
+        await connection.rollback();
+        throw err;
+      }
+    });
+    return res.json({ coins: newCoins });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return next(error);
+  }
+});
+
 router.get("/items", async (_req, res, next) => {
   try {
     const result = await withConnection((connection) =>
@@ -142,6 +212,68 @@ router.get("/items", async (_req, res, next) => {
         image_url: row.IMAGE_URL
       }))
     );
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/equipped/:userId", async (req, res, next) => {
+  const targetUserId = Number(req.params.userId);
+  if (!Number.isFinite(targetUserId)) {
+    return res.status(400).json({ error: "Invalid user id." });
+  }
+
+  try {
+    if (targetUserId !== req.user.userId) {
+      const friendshipRes = await withConnection((connection) =>
+        connection.execute(
+          `SELECT 1
+           FROM FRIENDSHIP
+           WHERE status = 'accepted'
+             AND ((user_id_1 = :currentUserId AND user_id_2 = :targetUserId)
+               OR (user_id_1 = :targetUserId AND user_id_2 = :currentUserId))`,
+          { currentUserId: req.user.userId, targetUserId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        )
+      );
+      if (!friendshipRes.rows.length) {
+        return res.status(403).json({ error: "Friendship required." });
+      }
+    }
+
+    const profileRes = await withConnection((connection) =>
+      connection.execute(
+        `SELECT user_id, profile_pic
+         FROM USERS
+         WHERE user_id = :userId`,
+        { userId: targetUserId },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      )
+    );
+    const user = profileRes.rows[0];
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json({ user_id: user.USER_ID, equipped: parseEquipped(user.PROFILE_PIC) });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.put("/equipped", async (req, res, next) => {
+  const equipped = normalizeEquipped(req.body?.equipped || {});
+  try {
+    await withConnection((connection) =>
+      connection.execute(
+        `UPDATE USERS
+         SET profile_pic = :profilePic
+         WHERE user_id = :userId`,
+        { profilePic: serializeEquipped(equipped), userId: req.user.userId },
+        { autoCommit: true }
+      )
+    );
+    return res.json({ success: true, equipped });
   } catch (error) {
     return next(error);
   }

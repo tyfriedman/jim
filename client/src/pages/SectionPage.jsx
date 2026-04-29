@@ -4,7 +4,9 @@ export default function SectionPage({ title }) {
   const navigate = useNavigate();
   const location = useLocation();
   const swipeDirection = location.state?.swipeDirection;
-  const backDirection = swipeDirection === "left" ? "right" : "left";
+  const returnHomeSide =
+    location.state?.homeEntrySide ||
+    (swipeDirection === "left" ? "right" : swipeDirection === "right" ? "left" : "left");
 
   return (
     <div
@@ -20,6 +22,10 @@ export default function SectionPage({ title }) {
       <div className="retro-cloud retro-cloud--2" aria-hidden />
       <div className="retro-cloud retro-cloud--3" aria-hidden />
       <div className="retro-cloud retro-cloud--4" aria-hidden />
+      <div className="retro-cloud retro-cloud--5" aria-hidden />
+      <div className="retro-cloud retro-cloud--6" aria-hidden />
+      <div className="retro-cloud retro-cloud--7" aria-hidden />
+      <div className="retro-cloud retro-cloud--8" aria-hidden />
       <div className="retro-hill" aria-hidden />
 
       <div className="retro-home-hud">
@@ -32,7 +38,7 @@ export default function SectionPage({ title }) {
         <button
           type="button"
           className="retro-btn retro-btn--ghost retro-btn--small"
-          onClick={() => navigate("/home", { state: { swipeDirection: backDirection } })}
+          onClick={() => navigate("/home", { state: { homeEntrySide: returnHomeSide } })}
         >
           Back
         </button>

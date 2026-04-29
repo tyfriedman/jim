@@ -12,6 +12,7 @@ const friendRoutes = require("./routes/friends");
 const feedRoutes = require("./routes/feed");
 const challengeRoutes = require("./routes/challenges");
 const avatarRoutes = require("./routes/avatar");
+const achievementRoutes = require("./routes/achievements");
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/friends", friendRoutes);
 app.use("/api/feed", feedRoutes);
 app.use("/api/challenges", challengeRoutes);
 app.use("/api/avatar", avatarRoutes);
+app.use("/api/achievements", achievementRoutes);
 
 app.use((error, _req, res, _next) => {
   // Keep runtime errors server-side, return generic response to clients.

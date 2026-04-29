@@ -208,19 +208,31 @@ router.put("/:id/accept", async (req, res, next) => {
   }
 
   try {
-    const result = await withConnection((connection) =>
-      connection.execute(
-        `UPDATE FRIENDSHIP
-         SET status = 'accepted'
-         WHERE user_id_1 = :otherUserId
-           AND user_id_2 = :userId
-           AND status = 'pending'`,
-        { userId: req.user.userId, otherUserId },
-        { autoCommit: true }
-      )
-    );
+    const rowsAffected = await withConnection(async (connection) => {
+      try {
+        const result = await connection.execute(
+          `UPDATE FRIENDSHIP
+           SET status = 'accepted'
+           WHERE user_id_1 = :otherUserId
+             AND user_id_2 = :userId
+             AND status = 'pending'`,
+          { userId: req.user.userId, otherUserId }
+        );
+        if (result.rowsAffected > 0) {
+          await connection.execute(
+            "UPDATE USERS SET coins = coins + 1 WHERE user_id = :userId",
+            { userId: req.user.userId }
+          );
+        }
+        await connection.commit();
+        return result.rowsAffected;
+      } catch (err) {
+        await connection.rollback();
+        throw err;
+      }
+    });
 
-    if (result.rowsAffected === 0) {
+    if (rowsAffected === 0) {
       return res.status(404).json({ error: "Pending friend request not found." });
     }
 

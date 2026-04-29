@@ -213,6 +213,11 @@ router.post("/:logId/comment", async (req, res, next) => {
           { logId }
         );
 
+        await connection.execute(
+          "UPDATE USERS SET coins = coins + 1 WHERE user_id = :userId",
+          { userId: req.user.userId }
+        );
+
         await connection.commit();
         return { commentId: insertComment.outBinds.commentId[0] };
       } catch (error) {
@@ -259,6 +264,11 @@ router.post("/:logId/hype", async (req, res, next) => {
            )
            WHERE log_id = :logId`,
           { logId }
+        );
+
+        await connection.execute(
+          "UPDATE USERS SET coins = coins + 1 WHERE user_id = :userId",
+          { userId: req.user.userId }
         );
 
         await connection.commit();

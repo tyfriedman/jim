@@ -103,6 +103,12 @@ export function AuthProvider({ children }) {
     [persistSession]
   );
 
+  const updateCoins = useCallback((amount) => {
+    const n = Number(amount);
+    localStorage.setItem(STORAGE_COINS, String(n));
+    setCoins(n);
+  }, []);
+
   const value = useMemo(
     () => ({
       token,
@@ -112,9 +118,10 @@ export function AuthProvider({ children }) {
       authReady,
       login,
       register,
-      logout
+      logout,
+      updateCoins
     }),
-    [token, userId, coins, username, authReady, login, register, logout]
+    [token, userId, coins, username, authReady, login, register, logout, updateCoins]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

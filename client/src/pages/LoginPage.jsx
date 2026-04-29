@@ -23,7 +23,7 @@ export default function LoginPage() {
       } else {
         await register(username.trim(), email.trim(), password);
       }
-      navigate("/home", { replace: true });
+      navigate("/home", { replace: true, state: { fromLogin: true } });
     } catch (err) {
       setError(err.message || "Something went wrong.");
     } finally {
@@ -35,10 +35,43 @@ export default function LoginPage() {
     <div className="retro-page retro-login">
       <div className="retro-cloud retro-cloud--1" aria-hidden />
       <div className="retro-cloud retro-cloud--2" aria-hidden />
+      <div className="retro-cloud retro-cloud--3" aria-hidden />
+      <div className="retro-cloud retro-cloud--4" aria-hidden />
+      <div className="retro-cloud retro-cloud--5" aria-hidden />
+      <div className="retro-cloud retro-cloud--6" aria-hidden />
+      <div className="retro-cloud retro-cloud--7" aria-hidden />
+      <div className="retro-cloud retro-cloud--8" aria-hidden />
       <div className="retro-hill" aria-hidden />
+      <img
+        src="/sprites/gym_equipment/bench.png"
+        alt=""
+        aria-hidden
+        className="retro-gym-prop retro-gym-prop--login retro-gym-prop--login-bench"
+      />
+      <img
+        src="/sprites/gym_equipment/treadmill.png"
+        alt=""
+        aria-hidden
+        className="retro-gym-prop retro-gym-prop--login retro-gym-prop--login-treadmill"
+      />
+      <img
+        src="/sprites/gym_equipment/weight.png"
+        alt=""
+        aria-hidden
+        className="retro-gym-prop retro-gym-prop--login retro-gym-prop--login-squat"
+      />
+      <img
+        src="/sprites/gym_equipment/dumbell.png"
+        alt=""
+        aria-hidden
+        className="retro-gym-prop retro-gym-prop--login retro-gym-prop--login-dumbbell"
+      />
+
+      <p className="retro-login-logo" aria-label="JIM logo">
+        JIM
+      </p>
 
       <div className="retro-panel">
-        <p className="retro-brand">JIM</p>
         <h1 className="retro-title">Player select</h1>
         <p className="retro-subtitle">Enter the fitness kingdom</p>
 
