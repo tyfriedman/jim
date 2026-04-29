@@ -5,11 +5,12 @@ const { requireAuth } = require("../middleware/auth");
 const router = express.Router();
 router.use(requireAuth);
 const EQUIPPED_PROFILE_PREFIX = "jim-equipped:";
+const DEFAULT_EYES_ITEM_ID = "eyes1";
 
 function normalizeEquipped(raw) {
   return {
     body: typeof raw?.body === "string" ? raw.body : null,
-    eyes: typeof raw?.eyes === "string" ? raw.eyes : null,
+    eyes: typeof raw?.eyes === "string" ? raw.eyes : DEFAULT_EYES_ITEM_ID,
     mouth: typeof raw?.mouth === "string" ? raw.mouth : null,
     hat: typeof raw?.hat === "string" ? raw.hat : null
   };
@@ -148,14 +149,27 @@ router.post("/equip", async (req, res, next) => {
 });
 
 router.post("/buy", async (req, res, next) => {
-  const price = Number(req.body.price);
-  if (!Number.isFinite(price) || price < 0) {
-    return res.status(400).json({ error: "Invalid price." });
+  const itemId = String(req.body.itemId || "").trim();
+  if (!itemId) {
+    return res.status(400).json({ error: "itemId is required." });
   }
 
   try {
     const newCoins = await withConnection(async (connection) => {
       try {
+        const itemRes = await connection.execute(
+          `SELECT xp_required
+           FROM AVATAR_ITEM
+           WHERE unlock_condition = :itemId`,
+          { itemId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        const item = itemRes.rows[0];
+        if (!item) {
+          throw Object.assign(new Error("Item not found."), { statusCode: 404 });
+        }
+        const price = Number(item.XP_REQUIRED) || 0;
+
         const coinRes = await connection.execute(
           "SELECT coins FROM USERS WHERE user_id = :userId",
           { userId: req.user.userId },

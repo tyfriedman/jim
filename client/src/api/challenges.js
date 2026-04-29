@@ -74,3 +74,10 @@ export function apiGetChallengeLeaderboard(token, challengeId) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+export function apiDeleteChallenge(token, challengeId) {
+  return request(`/challenges/${challengeId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

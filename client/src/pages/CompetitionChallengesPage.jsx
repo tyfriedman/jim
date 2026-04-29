@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { apiGetExercises } from "../api/workouts.js";
 import { apiGetFriends } from "../api/friends.js";
 import {
   apiCreateChallenge,
+  apiDeleteChallenge,
   apiGetChallengeLeaderboard,
   apiGetChallenges,
   apiInviteToChallenge,
@@ -26,11 +27,190 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
+function getDefaultChallengeDates() {
+  const startDate = new Date();
+  const endDate = new Date(startDate);
+  endDate.setMonth(endDate.getMonth() + 1);
+  return {
+    start_date: toDateInputValue(startDate),
+    end_date: toDateInputValue(endDate)
+  };
+}
+
+function createInitialChallengeForm() {
+  const defaults = getDefaultChallengeDates();
+  return {
+    title: "",
+    description: "",
+    exercise_id: "",
+    target_value: "",
+    start_date: defaults.start_date,
+    end_date: defaults.end_date,
+    is_public: "1",
+    invited_user_ids: []
+  };
+}
+
 function isActiveChallenge(challenge) {
   const now = new Date();
   const start = new Date(challenge.start_date);
   const end = new Date(challenge.end_date);
   return !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && start <= now && now <= end;
+}
+
+function padDatePart(value) {
+  return String(value).padStart(2, "0");
+}
+
+function parseDateParts(value) {
+  if (typeof value !== "string") {
+    return { year: "", month: "", day: "" };
+  }
+  const parts = value.split("-");
+  if (parts.length !== 3) {
+    return { year: "", month: "", day: "" };
+  }
+  const [year, month, day] = parts;
+  if (!year || !month || !day) {
+    return { year: "", month: "", day: "" };
+  }
+  return { year, month, day };
+}
+
+function getDaysInMonth(year, month) {
+  const yearNumber = Number(year);
+  const monthNumber = Number(month);
+  if (!Number.isInteger(yearNumber) || !Number.isInteger(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+    return 31;
+  }
+  return new Date(yearNumber, monthNumber, 0).getDate();
+}
+
+function RetroSelect({ value, options, placeholder, onChange, disabled = false }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    function handleOutsideClick(ev) {
+      if (!rootRef.current) {
+        return;
+      }
+      if (!rootRef.current.contains(ev.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  const selected = options.find((option) => String(option.value) === String(value));
+  const label = selected?.label || placeholder;
+
+  return (
+    <div className={`retro-select ${open ? "retro-select--open" : ""}`} ref={rootRef}>
+      <button
+        type="button"
+        className="retro-select-trigger"
+        onMouseDown={(ev) => {
+          ev.preventDefault();
+          if (!disabled) {
+            setOpen((prev) => !prev);
+          }
+        }}
+        disabled={disabled}
+      >
+        <span>{label}</span>
+        <span className="retro-select-caret" aria-hidden>
+          {open ? "▲" : "▼"}
+        </span>
+      </button>
+      {open ? (
+        <div className="retro-select-menu">
+          {options.map((option) => (
+            <button
+              key={String(option.value)}
+              type="button"
+              className={`retro-select-option ${
+                String(option.value) === String(value) ? "retro-select-option--active" : ""
+              }`}
+              onMouseDown={(ev) => {
+                ev.preventDefault();
+                onChange(option.value);
+                setOpen(false);
+              }}
+              disabled={option.disabled}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function RetroDateSelect({ value, onChange }) {
+  const [dateParts, setDateParts] = useState(() => parseDateParts(value));
+  const nowYear = new Date().getFullYear();
+
+  useEffect(() => {
+    setDateParts(parseDateParts(value));
+  }, [value]);
+
+  const yearOptions = [];
+  for (let year = nowYear - 1; year <= nowYear + 5; year += 1) {
+    yearOptions.push({ value: String(year), label: String(year) });
+  }
+
+  const monthOptions = [];
+  for (let month = 1; month <= 12; month += 1) {
+    monthOptions.push({ value: padDatePart(month), label: padDatePart(month) });
+  }
+
+  const dayOptions = [];
+  const dayLimit = getDaysInMonth(dateParts.year, dateParts.month);
+  for (let day = 1; day <= dayLimit; day += 1) {
+    dayOptions.push({ value: padDatePart(day), label: padDatePart(day) });
+  }
+
+  function updateDatePart(key, nextValue) {
+    const next = { ...dateParts, [key]: String(nextValue) };
+    const maxDay = getDaysInMonth(next.year, next.month);
+    if (next.day && Number(next.day) > maxDay) {
+      next.day = padDatePart(maxDay);
+    }
+    setDateParts(next);
+    if (next.year && next.month && next.day) {
+      onChange(`${next.year}-${next.month}-${next.day}`);
+      return;
+    }
+    onChange("");
+  }
+
+  return (
+    <div className="retro-challengehub-date-selects">
+      <RetroSelect
+        value={dateParts.year}
+        placeholder="Year"
+        options={yearOptions}
+        onChange={(nextValue) => updateDatePart("year", nextValue)}
+      />
+      <RetroSelect
+        value={dateParts.month}
+        placeholder="Month"
+        options={monthOptions}
+        onChange={(nextValue) => updateDatePart("month", nextValue)}
+      />
+      <RetroSelect
+        value={dateParts.day}
+        placeholder="Day"
+        options={dayOptions}
+        onChange={(nextValue) => updateDatePart("day", nextValue)}
+      />
+    </div>
+  );
 }
 
 export default function CompetitionChallengesPage() {
@@ -49,24 +229,18 @@ export default function CompetitionChallengesPage() {
   const [loadingBoards, setLoadingBoards] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [createSuccessMessage, setCreateSuccessMessage] = useState("");
   const [joiningChallengeId, setJoiningChallengeId] = useState(null);
   const [invitingChallengeId, setInvitingChallengeId] = useState(null);
+  const [deletingChallengeId, setDeletingChallengeId] = useState(null);
+  const [deleteConfirmChallenge, setDeleteConfirmChallenge] = useState(null);
   const [inviteTargets, setInviteTargets] = useState({});
   const [logValues, setLogValues] = useState({});
   const [loggingChallengeId, setLoggingChallengeId] = useState(null);
 
   const [activeTab, setActiveTab] = useState("create");
 
-  const [form, setForm] = useState(() => ({
-    title: "",
-    description: "",
-    exercise_id: "",
-    target_value: "",
-    start_date: "",
-    end_date: "",
-    is_public: "1",
-    invited_user_ids: [],
-  }));
+  const [form, setForm] = useState(() => createInitialChallengeForm());
 
   const exerciseOptions = useMemo(
     () =>
@@ -140,9 +314,22 @@ export default function CompetitionChallengesPage() {
     });
   }, [activeChallenges, leaderboards]);
 
+  useEffect(() => {
+    if (!createSuccessMessage) {
+      return undefined;
+    }
+    const timeoutId = setTimeout(() => {
+      setCreateSuccessMessage("");
+    }, 2000);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [createSuccessMessage]);
+
   async function handleCreateChallenge(ev) {
     ev.preventDefault();
     setError("");
+    setCreateSuccessMessage("");
     if (!form.exercise_id || !form.title || !form.target_value || !form.start_date || !form.end_date) {
       setError("Please fill title, exercise, target value, start date, and end date.");
       return;
@@ -163,16 +350,8 @@ export default function CompetitionChallengesPage() {
         is_public: Number(form.is_public),
         invited_user_ids: form.is_public === "0" ? form.invited_user_ids.map(Number) : [],
       });
-      setForm({
-        title: "",
-        description: "",
-        exercise_id: "",
-        target_value: "",
-        start_date: "",
-        end_date: "",
-        is_public: "1",
-        invited_user_ids: [],
-      });
+      setForm(createInitialChallengeForm());
+      setCreateSuccessMessage("Challenge created!");
       await refreshChallenges();
     } catch (err) {
       setError(err.message || "Failed to create challenge.");
@@ -229,6 +408,55 @@ export default function CompetitionChallengesPage() {
     } finally {
       setInvitingChallengeId(null);
     }
+  }
+
+  function requestDeleteChallenge(challenge) {
+    setDeleteConfirmChallenge({
+      challenge_id: challenge.challenge_id,
+      title: challenge.title
+    });
+  }
+
+  function cancelDeleteChallenge() {
+    setDeleteConfirmChallenge(null);
+  }
+
+  async function confirmDeleteChallenge() {
+    if (!deleteConfirmChallenge || deletingChallengeId) {
+      return;
+    }
+    const challengeId = deleteConfirmChallenge.challenge_id;
+    setDeletingChallengeId(challengeId);
+    setError("");
+    setCreateSuccessMessage("");
+    try {
+      await apiDeleteChallenge(token, challengeId);
+      setLeaderboards((prev) => {
+        const next = { ...prev };
+        delete next[challengeId];
+        return next;
+      });
+      await refreshChallenges();
+      setCreateSuccessMessage("Challenge deleted.");
+    } catch (err) {
+      setError(err.message || "Failed to delete challenge.");
+    } finally {
+      setDeleteConfirmChallenge(null);
+      setDeletingChallengeId(null);
+    }
+  }
+
+  function toggleInvitedUser(userId) {
+    const nextUserId = String(userId);
+    setForm((prev) => {
+      const isSelected = prev.invited_user_ids.includes(nextUserId);
+      return {
+        ...prev,
+        invited_user_ids: isSelected
+          ? prev.invited_user_ids.filter((id) => id !== nextUserId)
+          : [...prev.invited_user_ids, nextUserId]
+      };
+    });
   }
 
   return (
@@ -303,18 +531,12 @@ export default function CompetitionChallengesPage() {
             <div className="retro-challengehub-grid">
               <label className="retro-field">
                 <span className="retro-label">Exercise</span>
-                <select
-                  className="retro-input"
+                <RetroSelect
                   value={form.exercise_id}
-                  onChange={(ev) => setForm((prev) => ({ ...prev, exercise_id: ev.target.value }))}
-                >
-                  <option value="">Select exercise</option>
-                  {exerciseOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Select exercise"
+                  options={exerciseOptions}
+                  onChange={(value) => setForm((prev) => ({ ...prev, exercise_id: String(value) }))}
+                />
               </label>
               <label className="retro-field">
                 <span className="retro-label">Target Value</span>
@@ -329,20 +551,16 @@ export default function CompetitionChallengesPage() {
               </label>
               <label className="retro-field">
                 <span className="retro-label">Start Date</span>
-                <input
-                  type="date"
-                  className="retro-input"
+                <RetroDateSelect
                   value={form.start_date}
-                  onChange={(ev) => setForm((prev) => ({ ...prev, start_date: ev.target.value }))}
+                  onChange={(nextDate) => setForm((prev) => ({ ...prev, start_date: nextDate }))}
                 />
               </label>
               <label className="retro-field">
                 <span className="retro-label">End Date</span>
-                <input
-                  type="date"
-                  className="retro-input"
+                <RetroDateSelect
                   value={form.end_date}
-                  onChange={(ev) => setForm((prev) => ({ ...prev, end_date: ev.target.value }))}
+                  onChange={(nextDate) => setForm((prev) => ({ ...prev, end_date: nextDate }))}
                 />
               </label>
             </div>
@@ -365,28 +583,37 @@ export default function CompetitionChallengesPage() {
             </div>
 
             {form.is_public === "0" ? (
-              <label className="retro-field">
+              <div className="retro-field">
                 <span className="retro-label">Invite Friends (optional)</span>
-                <select
-                  multiple
-                  className="retro-input"
-                  value={form.invited_user_ids}
-                  onChange={(ev) => {
-                    const values = Array.from(ev.target.selectedOptions).map((option) => option.value);
-                    setForm((prev) => ({ ...prev, invited_user_ids: values }));
-                  }}
-                >
-                  {friends.map((friend) => (
-                    <option key={friend.user_id} value={String(friend.user_id)}>
-                      {friend.username}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                {friends.length === 0 ? (
+                  <p className="retro-hint">No friends available to invite.</p>
+                ) : (
+                  <div className="retro-challengehub-invite-list">
+                    {friends.map((friend) => {
+                      const isSelected = form.invited_user_ids.includes(String(friend.user_id));
+                      return (
+                        <button
+                          key={friend.user_id}
+                          type="button"
+                          className={`retro-btn retro-btn--small ${
+                            isSelected ? "retro-btn--primary" : "retro-btn--ghost"
+                          }`}
+                          onClick={() => toggleInvitedUser(friend.user_id)}
+                        >
+                          {friend.username}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             ) : null}
 
             <div className="retro-actions">
-              <button type="submit" className="retro-btn retro-btn--primary retro-btn--small">
+              <button
+                type="submit"
+                className="retro-btn retro-btn--primary retro-btn--small retro-challengehub-create-btn"
+              >
                 Create Challenge
               </button>
             </div>
@@ -437,6 +664,21 @@ export default function CompetitionChallengesPage() {
                         onClick={() => handleJoin(challenge.challenge_id)}
                       >
                         {joiningChallengeId === challenge.challenge_id ? "Joining..." : "Join Challenge"}
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {challenge.creator_id === userId ? (
+                    <div className="retro-actions">
+                      <button
+                        type="button"
+                        className="retro-btn retro-btn--danger retro-btn--small"
+                        disabled={deletingChallengeId === challenge.challenge_id}
+                        onClick={() => requestDeleteChallenge(challenge)}
+                      >
+                        {deletingChallengeId === challenge.challenge_id
+                          ? "Deleting..."
+                          : "Delete Challenge"}
                       </button>
                     </div>
                   ) : null}
@@ -519,7 +761,48 @@ export default function CompetitionChallengesPage() {
             {error}
           </div>
         ) : null}
+        {createSuccessMessage ? (
+          <div className="retro-banner retro-challenges-flash" role="status" aria-live="polite">
+            {createSuccessMessage}
+          </div>
+        ) : null}
       </div>
+
+      {deleteConfirmChallenge ? (
+        <div className="retro-modal-backdrop" role="presentation">
+          <div
+            className="retro-panel retro-modal-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="retro-delete-challenge-title"
+          >
+            <h2 id="retro-delete-challenge-title" className="retro-title">
+              Delete Challenge?
+            </h2>
+            <p className="retro-hint retro-modal-copy">
+              Remove "{deleteConfirmChallenge.title}" permanently?
+            </p>
+            <div className="retro-actions">
+              <button
+                type="button"
+                className="retro-btn retro-btn--ghost retro-btn--small"
+                onClick={cancelDeleteChallenge}
+                disabled={deletingChallengeId === deleteConfirmChallenge.challenge_id}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="retro-btn retro-btn--danger retro-btn--small"
+                onClick={confirmDeleteChallenge}
+                disabled={deletingChallengeId === deleteConfirmChallenge.challenge_id}
+              >
+                {deletingChallengeId === deleteConfirmChallenge.challenge_id ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

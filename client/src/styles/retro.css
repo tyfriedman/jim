@@ -2263,6 +2263,12 @@ body {
   gap: 12px;
 }
 
+.retro-challengehub-date-selects {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
 .retro-challengehub-board {
   border: 2px solid #1a1a2e;
   background: rgba(0, 0, 0, 0.2);
@@ -2270,6 +2276,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.retro-challengehub-create-btn {
+  width: 100%;
+}
+
+.retro-challengehub-invite-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .retro-goals-page .retro-challenges-shell {
@@ -2412,5 +2428,9 @@ body {
 
   .retro-challengehub-grid {
     grid-template-columns: 1fr;
+  }
+
+  .retro-challengehub-date-selects {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

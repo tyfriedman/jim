@@ -37,6 +37,7 @@ const SHOP_ITEMS = [
 const AVATAR_RUN_IN_DURATION_MS = 850;
 const AVATAR_START_OFFSET_X = -430;
 const AVATAR_END_OFFSET_X = 0;
+const DEFAULT_EYES_ITEM_ID = "eyes1";
 
 function getOwnedKey(userId) {
   return `jim_owned_${userId}`;
@@ -61,12 +62,12 @@ function loadEquipped(userId) {
     const parsed = raw ? JSON.parse(raw) : {};
     return {
       hat: parsed?.hat || null,
-      eyes: parsed?.eyes || null,
+      eyes: parsed?.eyes || DEFAULT_EYES_ITEM_ID,
       mouth: parsed?.mouth || null,
       body: parsed?.body || null,
     };
   } catch {
-    return { hat: null, eyes: null, mouth: null, body: null };
+    return { hat: null, eyes: DEFAULT_EYES_ITEM_ID, mouth: null, body: null };
   }
 }
 
@@ -77,7 +78,7 @@ function saveEquipped(userId, equipped) {
 function normalizeEquipped(raw) {
   return {
     hat: typeof raw?.hat === "string" ? raw.hat : null,
-    eyes: typeof raw?.eyes === "string" ? raw.eyes : null,
+    eyes: typeof raw?.eyes === "string" ? raw.eyes : DEFAULT_EYES_ITEM_ID,
     mouth: typeof raw?.mouth === "string" ? raw.mouth : null,
     body: typeof raw?.body === "string" ? raw.body : null
   };
@@ -208,7 +209,10 @@ export default function ClosetPage() {
   }
 
   function handleUnequip(categoryId) {
-    const next = { ...equipped, [categoryId]: null };
+    const next = {
+      ...equipped,
+      [categoryId]: categoryId === "eyes" ? DEFAULT_EYES_ITEM_ID : null
+    };
     setEquipped(next);
     saveEquipped(userId, next);
     apiSaveEquippedAvatar(token, next).catch(() => {});

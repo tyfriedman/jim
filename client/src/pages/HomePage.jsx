@@ -34,6 +34,7 @@ const JUMP_AIR_DURATION_MS = 300;
 const JUMP_LAND_DURATION_MS = 180;
 const JUMP_CROUCH_OFFSET_Y = 10;
 const JUMP_PEAK_OFFSET_Y = -78;
+const DEFAULT_EYES_ITEM_ID = "eyes1";
 const HOME_SPEECH_VISIBLE_DURATION_MS = 4200;
 const HOME_SPEECH_HIDDEN_DURATION_MS = 5200;
 const HOME_ENCOURAGEMENT_MESSAGES = [
@@ -82,12 +83,12 @@ function loadEquipped(userId) {
     const parsed = raw ? JSON.parse(raw) : {};
     return {
       hat: parsed?.hat || null,
-      eyes: parsed?.eyes || null,
+      eyes: parsed?.eyes || DEFAULT_EYES_ITEM_ID,
       mouth: parsed?.mouth || null,
       body: parsed?.body || null,
     };
   } catch {
-    return { hat: null, eyes: null, mouth: null, body: null };
+    return { hat: null, eyes: DEFAULT_EYES_ITEM_ID, mouth: null, body: null };
   }
 }
 
@@ -98,7 +99,7 @@ function saveEquipped(userId, equipped) {
 function normalizeEquipped(raw) {
   return {
     hat: typeof raw?.hat === "string" ? raw.hat : null,
-    eyes: typeof raw?.eyes === "string" ? raw.eyes : null,
+    eyes: typeof raw?.eyes === "string" ? raw.eyes : DEFAULT_EYES_ITEM_ID,
     mouth: typeof raw?.mouth === "string" ? raw.mouth : null,
     body: typeof raw?.body === "string" ? raw.body : null
   };

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { apiBuyItem } from "../api/shop.js";
+import { apiBuyItem, apiGetShopItems } from "../api/shop.js";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
 
 const CATEGORIES = [
@@ -9,29 +9,6 @@ const CATEGORIES = [
   { id: "eyes", label: "Eyes" },
   { id: "mouth", label: "Mouth" },
   { id: "body", label: "Body" },
-];
-
-const SHOP_ITEMS = [
-  { id: "bandana",      name: "Bandana",        category: "hat",   price: 0, image: "/sprites/purchases/Hat-hair/Bandana%20128x128px.png" },
-  { id: "hat1",         name: "Hat 1",           category: "hat",   price: 0, image: "/sprites/purchases/Hat-hair/Hat1%20128x128px.png" },
-  { id: "hat2",         name: "Hat 2",           category: "hat",   price: 0, image: "/sprites/purchases/Hat-hair/Hat2%20128x128px.png" },
-  { id: "hat3",         name: "Hat 3",           category: "hat",   price: 0, image: "/sprites/purchases/Hat-hair/Hat3%20128x128px.png" },
-  { id: "hair1",        name: "Hair 1",          category: "hat",   price: 0, image: "/sprites/purchases/Hat-hair/hair1%20128x128px.png" },
-  { id: "hair2",        name: "Hair 2",          category: "hat",   price: 0, image: "/sprites/purchases/Hat-hair/hair2%20128x128px.png" },
-  { id: "blackglasses", name: "Black Glasses",   category: "eyes",  price: 0, image: "/sprites/purchases/Eyes-glasses/Black%20glasses%20128x128px.png" },
-  { id: "eyepatch",     name: "Eye Patch",       category: "eyes",  price: 0, image: "/sprites/purchases/Eyes-glasses/Eye%20patch%20128x128px.png" },
-  { id: "eyes1",        name: "Eyes 1",          category: "eyes",  price: 0, image: "/sprites/purchases/Eyes-glasses/Eyes1%20128x128px.png" },
-  { id: "eyes2",        name: "Eyes 2",          category: "eyes",  price: 0, image: "/sprites/purchases/Eyes-glasses/Eyes2%20128x128px.png" },
-  { id: "eyes3",        name: "Eyes 3",          category: "eyes",  price: 0, image: "/sprites/purchases/Eyes-glasses/Eyes3%20128x128px.png" },
-  { id: "monocle",      name: "Monocle",         category: "eyes",  price: 0, image: "/sprites/purchases/Eyes-glasses/Monocle%20128x128px.png" },
-  { id: "cig",          name: "Cig",             category: "mouth", price: 0, image: "/sprites/purchases/Beard-mouth/Cig%20128x128px.png" },
-  { id: "clownnose",    name: "Clown Nose",      category: "mouth", price: 0, image: "/sprites/purchases/Beard-mouth/Clown%20nose%20128x128px.png" },
-  { id: "crookedteeth", name: "Crooked Teeth",   category: "mouth", price: 0, image: "/sprites/purchases/Beard-mouth/Crooked%20teeth%20128x128px.png" },
-  { id: "mustache",     name: "Mustache",        category: "mouth", price: 0, image: "/sprites/purchases/Beard-mouth/Mustache%20128x128px.png" },
-  { id: "tongue",       name: "Tongue",          category: "mouth", price: 0, image: "/sprites/purchases/Beard-mouth/Tongue%20128x128px.png" },
-  { id: "yellow",       name: "Yellow Body",     category: "body",  price: 0, image: "/sprites/purchases/Body/Yellow%20128x128px.png" },
-  { id: "turquoise",    name: "Turquoise Body",  category: "body",  price: 0, image: "/sprites/purchases/Body/Turquoise%20128x128px.png" },
-  { id: "purple",       name: "Purple Body",     category: "body",  price: 0, image: "/sprites/purchases/Body/Purple%20128x128px.png" },
 ];
 
 function getOwnedKey(userId) {
@@ -64,15 +41,48 @@ export default function ShopPage() {
   const [owned, setOwned] = useState(() => loadOwned(userId));
   const [buying, setBuying] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [shopItems, setShopItems] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(true);
 
-  const visibleItems = SHOP_ITEMS.filter((item) => item.category === activeCategory);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadShopItems() {
+      setLoadingItems(true);
+      try {
+        const data = await apiGetShopItems(token);
+        if (cancelled) return;
+        const items = (Array.isArray(data) ? data : []).map((item) => ({
+          id: item.unlock_condition,
+          name: item.name,
+          category: String(item.item_type || "").toLowerCase(),
+          price: Number(item.xp_required) || 0,
+          image: item.image_url,
+        }));
+        setShopItems(items.filter((item) => item.id && item.image && item.category));
+      } catch (err) {
+        if (!cancelled) {
+          setErrorMsg(err.message || "Could not load shop items.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingItems(false);
+        }
+      }
+    }
+    loadShopItems();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const visibleItems = shopItems.filter((item) => item.category === activeCategory);
 
   async function handleBuy(item) {
     if (owned.has(item.id) || buying) return;
     setErrorMsg(null);
     setBuying(item.id);
     try {
-      const data = await apiBuyItem(token, item.price);
+      const data = await apiBuyItem(token, item.id);
       const next = new Set(owned);
       next.add(item.id);
       saveOwned(userId, next);
@@ -145,6 +155,7 @@ export default function ShopPage() {
         </div>
 
         <div className="retro-shop-grid">
+          {loadingItems && <p>Loading shop items...</p>}
           {visibleItems.map((item) => {
             const isOwned = owned.has(item.id);
             const isBuying = buying === item.id;

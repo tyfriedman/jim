@@ -345,6 +345,61 @@ router.post("/:id/log", async (req, res, next) => {
   }
 });
 
+router.delete("/:id", async (req, res, next) => {
+  const challengeId = Number(req.params.id);
+  if (!Number.isFinite(challengeId)) {
+    return res.status(400).json({ error: "Invalid challenge id." });
+  }
+
+  try {
+    await withConnection(async (connection) => {
+      try {
+        const challengeRes = await connection.execute(
+          `SELECT challenge_id, creator_id
+           FROM CHALLENGE
+           WHERE challenge_id = :challengeId`,
+          { challengeId },
+          { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+
+        const challenge = challengeRes.rows[0];
+        if (!challenge) {
+          throw Object.assign(new Error("Challenge not found."), { statusCode: 404 });
+        }
+        if (Number(challenge.CREATOR_ID) !== Number(req.user.userId)) {
+          throw Object.assign(new Error("Only the challenge creator can delete this challenge."), {
+            statusCode: 403
+          });
+        }
+
+        await connection.execute(
+          `DELETE FROM CHALLENGE_PARTICIPANT
+           WHERE challenge_id = :challengeId`,
+          { challengeId }
+        );
+
+        await connection.execute(
+          `DELETE FROM CHALLENGE
+           WHERE challenge_id = :challengeId`,
+          { challengeId }
+        );
+
+        await connection.commit();
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      }
+    });
+
+    return res.json({ success: true });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return next(error);
+  }
+});
+
 router.get("/:id/leaderboard", async (req, res, next) => {
   const challengeId = Number(req.params.id);
   if (!Number.isFinite(challengeId)) {

@@ -23,11 +23,18 @@ export function apiGetAvatar(token) {
   });
 }
 
-export function apiBuyItem(token, price) {
+export function apiBuyItem(token, itemId) {
   return request("/avatar/buy", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ price }),
+    body: JSON.stringify({ itemId }),
+  });
+}
+
+export function apiGetShopItems(token) {
+  return request("/avatar/items", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 

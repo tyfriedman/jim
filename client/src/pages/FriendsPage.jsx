@@ -43,11 +43,12 @@ const EQUIPPED_ITEM_IMAGE_BY_ID = {
   hair2: "/sprites/purchases/Hat-hair/hair2%20128x128px.png"
 };
 const EQUIPPED_PROFILE_PREFIX = "jim-equipped:";
+const DEFAULT_EYES_ITEM_ID = "eyes1";
 
 function normalizeEquipped(raw) {
   return {
     body: typeof raw?.body === "string" ? raw.body : null,
-    eyes: typeof raw?.eyes === "string" ? raw.eyes : null,
+    eyes: typeof raw?.eyes === "string" ? raw.eyes : DEFAULT_EYES_ITEM_ID,
     mouth: typeof raw?.mouth === "string" ? raw.mouth : null,
     hat: typeof raw?.hat === "string" ? raw.hat : null
   };
