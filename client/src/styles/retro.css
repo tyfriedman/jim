@@ -1015,6 +1015,12 @@ html.theme-night .retro-cloud {
   flex-wrap: wrap;
 }
 
+.retro-workout-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .retro-workouts-header .retro-title {
   margin: 0;
 }
@@ -1390,6 +1396,51 @@ html.theme-night .retro-cloud {
 
 .retro-modal-copy {
   margin: 0 0 8px;
+}
+
+.retro-generate-workout-panel {
+  width: min(700px, 100%);
+  max-width: 700px;
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+}
+
+.retro-generate-workout-form {
+  gap: 10px;
+}
+
+.retro-generate-preview {
+  margin-top: 10px;
+  border-top: 2px dashed #1a1a2e;
+  padding-top: 10px;
+}
+
+.retro-generate-preview-title {
+  margin: 0 0 8px;
+}
+
+.retro-generate-preview-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-generate-preview-section {
+  border: 2px solid #1a1a2e;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(31, 59, 115, 0.16);
+}
+
+.retro-generate-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.retro-generate-preview-item {
+  margin: 0;
+  font-size: 12px;
 }
 
 .retro-workout-empty {

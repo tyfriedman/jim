@@ -1,4 +1,6 @@
+const path = require("path");
 require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../.env"), override: false });
 
 const express = require("express");
 const cors = require("cors");
@@ -6,6 +8,7 @@ const { initPool, closePool } = require("./db/connection");
 
 const authRoutes = require("./routes/auth");
 const workoutRoutes = require("./routes/workouts");
+const workoutGenerationRoutes = require("./routes/workout-generation");
 const exerciseRoutes = require("./routes/exercises");
 const goalRoutes = require("./routes/goals");
 const friendRoutes = require("./routes/friends");
@@ -37,6 +40,7 @@ app.get("/health", async (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/workouts", workoutGenerationRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/exercises", exerciseRoutes);
 app.use("/api/goals", goalRoutes);

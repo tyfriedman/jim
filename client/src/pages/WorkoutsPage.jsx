@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import {
   apiCreateWorkout,
   apiDeleteWorkout,
+  apiGenerateWorkout,
   apiGetExercises,
   apiGetWorkoutComments,
   apiGetWorkouts,
@@ -186,6 +187,11 @@ export default function WorkoutsPage() {
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [deletingLogId, setDeletingLogId] = useState(null);
   const [deleteConfirmLog, setDeleteConfirmLog] = useState(null);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [generatePrompt, setGeneratePrompt] = useState("");
+  const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
+  const [generateError, setGenerateError] = useState("");
+  const [generatedWorkout, setGeneratedWorkout] = useState(null);
 
   const exercisesById = useMemo(() => {
     const map = new Map();
@@ -380,6 +386,13 @@ export default function WorkoutsPage() {
     setFormError("");
   }
 
+  function resetGenerateState() {
+    setGeneratePrompt("");
+    setIsGeneratingWorkout(false);
+    setGenerateError("");
+    setGeneratedWorkout(null);
+  }
+
   function buildFormFromWorkout(log) {
     const entries = (log.entries || []).map((entry) => {
       const exercise = exerciseByName.get(String(entry.exercise_name || "").toLowerCase());
@@ -547,6 +560,77 @@ export default function WorkoutsPage() {
       setDeleteConfirmLog(null);
       setDeletingLogId(null);
     }
+  }
+
+  function openGenerateWorkoutModal() {
+    resetGenerateState();
+    setShowGenerateModal(true);
+  }
+
+  function closeGenerateWorkoutModal() {
+    setShowGenerateModal(false);
+    resetGenerateState();
+  }
+
+  async function handleGenerateWorkout(ev) {
+    ev.preventDefault();
+    const prompt = generatePrompt.trim();
+    if (!prompt) {
+      setGenerateError("Please describe what sort of workout you are looking for.");
+      return;
+    }
+
+    setGenerateError("");
+    setGeneratedWorkout(null);
+    setIsGeneratingWorkout(true);
+    try {
+      const response = await apiGenerateWorkout(token, prompt);
+      if (!Array.isArray(response?.sections) || response.sections.length === 0) {
+        throw new Error("Generated workout was empty.");
+      }
+      setGeneratedWorkout(response);
+    } catch (err) {
+      setGenerateError(err.message || "Failed to generate workout.");
+    } finally {
+      setIsGeneratingWorkout(false);
+    }
+  }
+
+  function handleAcceptGeneratedWorkout() {
+    if (!generatedWorkout) {
+      return;
+    }
+
+    const generatedEntries = [];
+    for (const section of generatedWorkout.sections) {
+      for (const exercise of section.exercises || []) {
+        const mapped = exercisesById.get(Number(exercise.exercise_id));
+        generatedEntries.push({
+          row_id: Date.now() + Math.random(),
+          category_name: mapped?.category?.name || exercise.category || "",
+          exercise_id: String(exercise.exercise_id),
+          value: "",
+          sets: String(exercise.sets),
+          notes: `Reps: ${exercise.reps} | Rest: ${exercise.rest}`
+        });
+      }
+    }
+
+    if (generatedEntries.length === 0) {
+      setGenerateError("No valid exercises were generated.");
+      return;
+    }
+
+    const nextFormState = createInitialFormState();
+    setFormState({
+      ...nextFormState,
+      title: generatedWorkout.workout_title || nextFormState.title,
+      description: generatedWorkout.workout_description || "",
+      entries: generatedEntries
+    });
+    setFormError("");
+    setShowCreateForm(true);
+    closeGenerateWorkoutModal();
   }
 
   function renderWorkoutForm({
@@ -784,21 +868,30 @@ export default function WorkoutsPage() {
       <div className="retro-workouts-shell">
         <div className="retro-workouts-header">
           <h1 className="retro-title">Workouts</h1>
-          <button
-            type="button"
-            className="retro-btn retro-btn--primary retro-btn--small"
-            onClick={() => {
-              setShowCreateForm((prev) => {
-                const next = !prev;
-                if (!next) {
-                  resetForm();
-                }
-                return next;
-              });
-            }}
-          >
-            {showCreateForm ? "Close Add Workout" : "Add Workout"}
-          </button>
+          <div className="retro-workout-header-actions">
+            <button
+              type="button"
+              className="retro-btn retro-btn--ghost retro-btn--small"
+              onClick={openGenerateWorkoutModal}
+            >
+              Generate Workout
+            </button>
+            <button
+              type="button"
+              className="retro-btn retro-btn--primary retro-btn--small"
+              onClick={() => {
+                setShowCreateForm((prev) => {
+                  const next = !prev;
+                  if (!next) {
+                    resetForm();
+                  }
+                  return next;
+                });
+              }}
+            >
+              {showCreateForm ? "Close Add Workout" : "Add Workout"}
+            </button>
+          </div>
         </div>
 
         {error ? (
@@ -986,6 +1079,94 @@ export default function WorkoutsPage() {
                 {deletingLogId === deleteConfirmLog.log_id ? "Deleting..." : "Delete"}
               </button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showGenerateModal ? (
+        <div className="retro-modal-backdrop" role="presentation">
+          <div
+            className="retro-panel retro-modal-panel retro-generate-workout-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="retro-generate-workout-title"
+          >
+            <h2 id="retro-generate-workout-title" className="retro-title">
+              Generate Workout
+            </h2>
+            <form className="retro-form retro-generate-workout-form" onSubmit={handleGenerateWorkout}>
+              <label className="retro-field">
+                <span className="retro-label">Workout prompt</span>
+                <textarea
+                  className="retro-input retro-workout-textarea"
+                  placeholder="What sort of workout are you looking for today?"
+                  value={generatePrompt}
+                  onChange={(ev) => setGeneratePrompt(ev.target.value)}
+                  maxLength={1200}
+                />
+              </label>
+
+              {generateError ? (
+                <div className="retro-banner retro-banner--error" role="alert">
+                  {generateError}
+                </div>
+              ) : null}
+
+              <div className="retro-actions">
+                <button
+                  type="button"
+                  className="retro-btn retro-btn--ghost retro-btn--small"
+                  onClick={closeGenerateWorkoutModal}
+                  disabled={isGeneratingWorkout}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="retro-btn retro-btn--primary retro-btn--small"
+                  disabled={isGeneratingWorkout}
+                >
+                  {isGeneratingWorkout ? "Generating..." : "Generate"}
+                </button>
+              </div>
+            </form>
+
+            {generatedWorkout ? (
+              <div className="retro-generate-preview">
+                <p className="retro-label retro-generate-preview-title">{generatedWorkout.workout_title}</p>
+                <p className="retro-workout-copy">{generatedWorkout.workout_description}</p>
+                <div className="retro-generate-preview-sections">
+                  {generatedWorkout.sections.map((section, sectionIndex) => (
+                    <div
+                      key={`${section.section_name}-${sectionIndex}`}
+                      className="retro-generate-preview-section"
+                    >
+                      <p className="retro-label">{section.section_name}</p>
+                      <div className="retro-generate-preview-list">
+                        {section.exercises.map((exercise, exerciseIndex) => (
+                          <p
+                            key={`${section.section_name}-${exercise.exercise_id}-${exerciseIndex}`}
+                            className="retro-generate-preview-item"
+                          >
+                            {exercise.exercise_name} - {exercise.sets} sets - {exercise.reps} reps - Rest:{" "}
+                            {exercise.rest}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="retro-actions">
+                  <button
+                    type="button"
+                    className="retro-btn retro-btn--primary retro-btn--small"
+                    onClick={handleAcceptGeneratedWorkout}
+                  >
+                    Save Workout
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

@@ -75,3 +75,11 @@ export function apiGetWorkoutComments(token, logId) {
     headers: { Authorization: `Bearer ${token}` }
   });
 }
+
+export function apiGenerateWorkout(token, prompt) {
+  return request("/workouts/generate", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ prompt })
+  });
+}
