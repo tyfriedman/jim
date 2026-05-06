@@ -6,6 +6,7 @@ import SpriteAnimator from "../components/SpriteAnimator.jsx";
 import { apiGetAchievements } from "../api/achievements.js";
 import { apiGetFriendRequests } from "../api/friends.js";
 import { apiGetAvatar, apiGetEquippedAvatar, apiSaveEquippedAvatar } from "../api/shop.js";
+import { apiGetStreak } from "../api/workouts.js";
 
 const HOME_AVATAR_FRAME_COUNTS = [5, 8, 2, 2, 2];
 const AVATAR_PHASES = {
@@ -131,6 +132,7 @@ export default function HomePage() {
   const [goalsLoading, setGoalsLoading] = useState(true);
   const [activeGoalIndex, setActiveGoalIndex] = useState(0);
   const [pendingIncomingCount, setPendingIncomingCount] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [equipped, setEquipped] = useState(() => loadEquipped(userId));
   const [speechLoopReady, setSpeechLoopReady] = useState(false);
   const [motionDurationMs, setMotionDurationMs] = useState(0);
@@ -345,6 +347,24 @@ export default function HomePage() {
   }, [token]);
 
   useEffect(() => {
+    let cancelled = false;
+    apiGetStreak(token)
+      .then((data) => {
+        if (!cancelled) {
+          setStreak(Number(data?.streak) || 0);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setStreak(0);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  useEffect(() => {
     if (uncompletedGoals.length === 0) {
       setActiveGoalIndex(0);
       return undefined;
@@ -488,6 +508,10 @@ export default function HomePage() {
           </div>
         )}
         <div className="retro-home-hud-actions">
+          <span className="retro-streak-badge" aria-label={`Streak ${streak} days`}>
+            <img className="retro-streak-icon" src="/sprites/fire_streak.png" alt="" aria-hidden />
+            <span className="retro-streak-count">{streak}</span>
+          </span>
           <span className="retro-coins-badge">
             <img className="retro-coin-inline retro-coin-inline--hud" src="/sprites/coin.png" alt="" aria-hidden />
             <span className="retro-coins-count">x{coins ?? 0}</span>

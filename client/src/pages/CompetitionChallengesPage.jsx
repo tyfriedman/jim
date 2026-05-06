@@ -461,7 +461,7 @@ export default function CompetitionChallengesPage() {
 
   return (
     <div
-      className={`retro-page retro-section retro-scene ${
+      className={`retro-page retro-section retro-scene retro-challengehub-page ${
         swipeDirection === "left"
           ? "retro-scene--swipe-left"
           : swipeDirection === "right"

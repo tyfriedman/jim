@@ -700,7 +700,7 @@ html.theme-night .retro-cloud {
 
 .retro-xp-level {
   font-family: inherit;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #fce300;
   text-transform: uppercase;
@@ -709,8 +709,8 @@ html.theme-night .retro-cloud {
 }
 
 .retro-xp-bar {
-  width: 80px;
-  height: 10px;
+  width: 100px;
+  height: 12px;
   background: #1a1a2e;
   border: 2px solid #1a1a2e;
   overflow: hidden;
@@ -724,7 +724,7 @@ html.theme-night .retro-cloud {
 
 .retro-xp-label {
   font-family: inherit;
-  font-size: 9px;
+  font-size: 11px;
   color: #fce300;
   white-space: nowrap;
 }
@@ -763,6 +763,36 @@ html.theme-night .retro-cloud {
 
 .retro-home .retro-btn--small {
   font-size: 12px;
+}
+
+.retro-challengehub-page .retro-home-hud .retro-btn--small {
+  font-size: 12px;
+  padding: 12px 14px;
+}
+
+.retro-challengehub-page .retro-home-hud {
+  padding: 10px 14px;
+}
+
+.retro-challengehub-page .retro-brand--home {
+  font-size: clamp(40px, 5.8vw, 56px);
+}
+
+.retro-challengehub-page {
+  background: linear-gradient(
+    180deg,
+    var(--retro-sky-top) 0%,
+    var(--retro-sky-mid) 55%,
+    var(--retro-horizon) 55%,
+    var(--retro-horizon) 62%,
+    var(--retro-ground) 62%,
+    var(--retro-ground) 100%
+  );
+}
+
+.retro-challengehub-page::after {
+  bottom: auto;
+  height: 45%;
 }
 
 .retro-home-layout {
@@ -1955,6 +1985,107 @@ html.theme-night .retro-cloud {
   height: 30px;
 }
 
+/* ── Streak badge ── */
+.retro-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  margin-right: 10px;
+}
+
+.retro-streak-icon {
+  width: 26px;
+  height: 26px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(26, 26, 46, 0.9));
+}
+
+.retro-streak-count {
+  line-height: 1;
+}
+
+.retro-home .retro-streak-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.retro-home .retro-streak-badge {
+  margin-right: 12px;
+}
+
+/* ── Workouts HUD streak ── */
+.retro-workouts-page .retro-home-hud {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.retro-workouts-streak-hud {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: inherit;
+  color: #ffffff;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.retro-workouts-streak-label {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.retro-workouts-streak-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.retro-workouts-streak-count {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.retro-workouts-streak-icon {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  filter: drop-shadow(3px 3px 0 rgba(26, 26, 46, 0.9));
+}
+
+/* ── Friends leaderboard streak ── */
+.retro-friends-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffffff;
+  white-space: nowrap;
+  margin: 2px 0 6px;
+}
+
+.retro-friends-streak-icon {
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 2px 0 rgba(26, 26, 46, 0.9));
+}
+
+.retro-friends-streak-count {
+  line-height: 1;
+}
+
 .retro-home-goals-box {
   position: relative;
   z-index: 2;
@@ -1970,7 +2101,7 @@ html.theme-night .retro-cloud {
 
 .retro-home-goals-title {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: #fce300;
   text-shadow: 2px 2px 0 #8b4513;
 }
@@ -1992,15 +2123,24 @@ html.theme-night .retro-cloud {
 
 .retro-home-goal-name {
   margin: 0 0 6px;
-  font-size: 11px;
+  font-size: 13px;
   color: #ffffff;
 }
 
 .retro-home-goal-desc {
   margin: 0 0 8px;
-  font-size: 10px;
-  color: #dbe7ff;
-  line-height: 1.4;
+  font-size: 11px;
+  color: #f2f6ff;
+  line-height: 1.55;
+}
+
+.retro-home-goals-box .retro-hint {
+  font-size: 12px;
+}
+
+.retro-home-goals-box .retro-challenge-progress-label {
+  font-size: 11px;
+  color: #ffffff;
 }
 
 .retro-coin-inline {
@@ -2422,6 +2562,14 @@ html.theme-night .retro-cloud {
   align-items: center;
 }
 
+.retro-challengehub-shell .retro-title {
+  font-size: 26px;
+}
+
+.retro-challengehub-shell .retro-tab {
+  font-size: 14px;
+}
+
 .retro-challengehub-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2500,7 +2648,10 @@ html.theme-night .retro-cloud {
 
 .retro-challenge-card--medium { background: #1f3b73; }
 .retro-challenge-card--hard   { background: #1f3b73; }
-.retro-challenge-card--claimed { opacity: 1; }
+.retro-challenge-card--claimed {
+  opacity: 0.78;
+  filter: grayscale(0.35) saturate(0.7);
+}
 
 .retro-challenge-card-header {
   display: flex;

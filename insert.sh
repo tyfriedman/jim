@@ -19,5 +19,6 @@ if [[ -z "${ORACLE_CONNECTION_STRING:-}" ]]; then
   exit 1
 fi
 
-sqlplus "${ORACLE_CONNECTION_STRING}" @create/ins_exercises.sql
+# sqlplus "${ORACLE_CONNECTION_STRING}" @create/ins_exercises.sql
 # sqlplus "$ORACLE_CONNECTION_STRING" @create/upd_avatar_item_xp_required.sql
+sqlplus "${ORACLE_CONNECTION_STRING}" @create/add_coins.sql

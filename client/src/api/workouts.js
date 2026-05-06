@@ -42,6 +42,20 @@ export function apiGetWorkouts(token) {
   });
 }
 
+export function apiGetStreak(token) {
+  return request("/workouts/streak", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}
+
+export function apiGetUserStreak(token, userId) {
+  return request(`/workouts/streak/${userId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}
+
 export function apiCreateWorkout(token, payload) {
   return request("/workouts", {
     method: "POST",

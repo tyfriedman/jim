@@ -19,6 +19,7 @@ import {
 } from "../api/friends.js";
 import SpriteAnimator from "../components/SpriteAnimator.jsx";
 import { apiGetAvatar, apiGetEquippedAvatar } from "../api/shop.js";
+import { apiGetUserStreak } from "../api/workouts.js";
 
 const EQUIPPED_ITEM_IMAGE_BY_ID = {
   yellow: "/sprites/purchases/Body/Yellow%20128x128px.png",
@@ -125,6 +126,7 @@ export default function FriendsPage() {
   const [friendAvatarMode, setFriendAvatarMode] = useState("run");
   const [equippedByFriendId, setEquippedByFriendId] = useState({});
   const [ownAvatar, setOwnAvatar] = useState(null);
+  const [streakByUserId, setStreakByUserId] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -230,6 +232,45 @@ export default function FriendsPage() {
       cancelled = true;
     };
   }, [friends, feed, token]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadStreaks() {
+      const ids = [userId, ...friends.map((friend) => Number(friend.user_id))].filter((id) =>
+        Number.isFinite(id)
+      );
+
+      if (ids.length === 0) {
+        setStreakByUserId({});
+        return;
+      }
+
+      const next = {};
+      await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const data = await apiGetUserStreak(token, id);
+            next[id] = Number(data?.streak) || 0;
+          } catch {
+            next[id] = 0;
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setStreakByUserId(next);
+      }
+    }
+
+    if (token) {
+      loadStreaks();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, userId, friends]);
 
   function setLoadingKey(key, nextValue) {
     setActionLoading((prev) => {
@@ -447,6 +488,10 @@ export default function FriendsPage() {
         {entries.map((entry, i) => (
           <div key={entry.user_id} className={`retro-friends-hub-item${entry.isSelf ? " retro-friends-hub-item--self" : ""}`}>
             <p className="retro-friends-hub-name">#{i + 1} {entry.username}{entry.isSelf ? " (You)" : ""}</p>
+            <span className="retro-friends-streak" aria-label={`Streak ${streakByUserId[entry.user_id] || 0} days`}>
+              <img className="retro-friends-streak-icon" src="/sprites/fire_streak.png" alt="" aria-hidden />
+              <span className="retro-friends-streak-count">{streakByUserId[entry.user_id] || 0}</span>
+            </span>
             <p className="retro-xp-level">Lv.{entry.avatar_level}</p>
             <div className="retro-xp-bar">
               <div className="retro-xp-bar-fill" style={{ width: `${(entry.xp / 50) * 100}%` }} />

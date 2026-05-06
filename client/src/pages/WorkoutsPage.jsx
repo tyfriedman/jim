@@ -7,6 +7,7 @@ import {
   apiGenerateWorkout,
   apiGetExercises,
   apiGetWorkoutComments,
+  apiGetStreak,
   apiGetWorkouts,
   apiUpdateWorkout
 } from "../api/workouts.js";
@@ -170,6 +171,7 @@ export default function WorkoutsPage() {
 
   const [workouts, setWorkouts] = useState([]);
   const [exercises, setExercises] = useState([]);
+  const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedLogId, setExpandedLogId] = useState(null);
@@ -245,15 +247,17 @@ export default function WorkoutsPage() {
       setLoading(true);
       setError("");
       try {
-        const [workoutData, exerciseData] = await Promise.all([
+        const [workoutData, exerciseData, streakData] = await Promise.all([
           apiGetWorkouts(token),
-          apiGetExercises()
+          apiGetExercises(),
+          apiGetStreak(token)
         ]);
         if (cancelled) {
           return;
         }
         setWorkouts(Array.isArray(workoutData) ? workoutData : []);
         setExercises(Array.isArray(exerciseData) ? exerciseData : []);
+        setStreak(Number(streakData?.streak) || 0);
       } catch (err) {
         if (!cancelled) {
           setError(err.message || "Failed to load workouts.");
@@ -270,6 +274,15 @@ export default function WorkoutsPage() {
       cancelled = true;
     };
   }, [token]);
+
+  async function refreshStreak() {
+    try {
+      const data = await apiGetStreak(token);
+      setStreak(Number(data?.streak) || 0);
+    } catch {
+      // keep existing streak on error
+    }
+  }
 
   function isCardioExercise(exerciseId) {
     const exercise = exercisesById.get(Number(exerciseId));
@@ -485,6 +498,7 @@ export default function WorkoutsPage() {
     try {
       await apiCreateWorkout(token, payload);
       await refreshWorkouts();
+      await refreshStreak();
       setShowCreateForm(false);
       resetForm();
     } catch (err) {
@@ -554,6 +568,7 @@ export default function WorkoutsPage() {
         stopEditingWorkout();
       }
       await refreshWorkouts();
+      await refreshStreak();
     } catch (err) {
       setError(err.message || "Failed to delete workout.");
     } finally {
@@ -854,6 +869,13 @@ export default function WorkoutsPage() {
 
       <div className="retro-home-hud">
         <p className="retro-brand retro-brand--home">Jim</p>
+        <div className="retro-workouts-streak-hud" aria-label={`Current workout streak ${streak} days`}>
+          <span className="retro-workouts-streak-label">current workout streak:</span>
+          <span className="retro-workouts-streak-value">
+            <span className="retro-workouts-streak-count">{streak}</span>
+            <img className="retro-workouts-streak-icon" src="/sprites/fire_streak.png" alt="" aria-hidden />
+          </span>
+        </div>
         <div className="retro-home-hud-actions">
           <button
             type="button"

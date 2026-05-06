@@ -5,6 +5,108 @@ const { requireAuth } = require("../middleware/auth");
 const router = express.Router();
 router.use(requireAuth);
 
+function toYmdLocal(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addDaysYmd(ymd, deltaDays) {
+  const [year, month, day] = ymd.split("-").map((part) => Number(part));
+  const d = new Date(year, month - 1, day);
+  d.setDate(d.getDate() + deltaDays);
+  return toYmdLocal(d);
+}
+
+function todayYmdLocal() {
+  return toYmdLocal(new Date());
+}
+
+async function areUsersFriends(connection, userIdA, userIdB) {
+  const friendshipRes = await connection.execute(
+    `SELECT 1
+     FROM FRIENDSHIP
+     WHERE status = 'accepted'
+       AND ((user_id_1 = :userA AND user_id_2 = :userB)
+         OR (user_id_1 = :userB AND user_id_2 = :userA))`,
+    { userA: userIdA, userB: userIdB },
+    { outFormat: oracledb.OUT_FORMAT_OBJECT }
+  );
+  return friendshipRes.rows.length > 0;
+}
+
+async function computeStreakForUser(connection, userId) {
+  const daysRes = await connection.execute(
+    `SELECT DISTINCT TRUNC(log_date) AS day
+     FROM WORKOUT_LOG
+     WHERE user_id = :userId
+     ORDER BY day DESC`,
+    { userId },
+    { outFormat: oracledb.OUT_FORMAT_OBJECT }
+  );
+
+  const daySet = new Set(
+    (daysRes.rows || [])
+      .map((row) => row.DAY)
+      .filter(Boolean)
+      .map((value) => toYmdLocal(value))
+  );
+
+  const today = todayYmdLocal();
+  const start = daySet.has(today) ? today : addDaysYmd(today, -1);
+  if (!daySet.has(start)) {
+    return { streak: 0, last_day: null };
+  }
+
+  let streak = 0;
+  let cursor = start;
+  while (daySet.has(cursor)) {
+    streak += 1;
+    cursor = addDaysYmd(cursor, -1);
+  }
+  return { streak, last_day: start };
+}
+
+router.get("/streak", async (req, res, next) => {
+  try {
+    const result = await withConnection((connection) =>
+      computeStreakForUser(connection, req.user.userId)
+    );
+    return res.json(result);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/streak/:userId", async (req, res, next) => {
+  const targetUserId = Number(req.params.userId);
+  if (!Number.isFinite(targetUserId)) {
+    return res.status(400).json({ error: "Invalid user id." });
+  }
+
+  try {
+    const result = await withConnection(async (connection) => {
+      if (targetUserId !== req.user.userId) {
+        const canView = await areUsersFriends(connection, req.user.userId, targetUserId);
+        if (!canView) {
+          return null;
+        }
+      }
+      return computeStreakForUser(connection, targetUserId);
+    });
+
+    if (!result) {
+      return res.status(403).json({ error: "Not allowed." });
+    }
+
+    return res.json(result);
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get("/", async (req, res, next) => {
   try {
     const logsResult = await withConnection((connection) =>
